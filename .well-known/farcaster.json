@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOiA4ODg4ODgsICJ0eXBlIjogImN1c3RvZHkiLCAia2V5IjogIjB4MGEwYjBjIn0",
+    "payload": "eyJkb21haW4iOiAiYmFzZWZ1bi1hcHAudmVyY2VsLmFwcCJ9",
+    "signature": "MHhjMGRlYmVlZ..."
+  },
+  "frame": {
+    "version": "1",
+    "name": "Base Fun",
+    "iconUrl": "https://basefun-app.vercel.app/icon-192.png",
+    "homeUrl": "https://basefun-app.vercel.app",
+    "imageUrl": "https://basefun-app.vercel.app/og.png",
+    "buttonTitle": "🎮 Oyna",
+    "splashImageUrl": "https://basefun-app.vercel.app/splash.png",
+    "splashBackgroundColor": "#0052FF"
+  }
+}
