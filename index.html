@@ -864,12 +864,20 @@ window.onload = () => {
 </script>
 
 <script>
-      window.addEventListener('load', () => {
-        if (window.farcaster && window.farcaster.sdk) {
-          window.farcaster.sdk.actions.ready();
-          console.log("Farcaster SDK: Ready sinyali gönderildi.");
-        }
-      });
-    </script>
+  // SDK'nın yüklenip yüklenmediğini sürekli kontrol eden fonksiyon
+  function notifyFarcasterReady() {
+    if (window.farcaster && window.farcaster.sdk) {
+      // SDK hazırsa bildirim gönder
+      window.farcaster.sdk.actions.ready();
+      console.log("Farcaster SDK: Başarıyla 'Ready' dendi.");
+    } else {
+      // SDK henüz yüklenmediyse 100ms sonra tekrar dene
+      setTimeout(notifyFarcasterReady, 100);
+    }
+  }
+
+  // Sayfa açılır açılmaz kontrolü başlat
+  notifyFarcasterReady();
+</script>
 </body>
 </html>
