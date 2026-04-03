@@ -861,22 +861,18 @@ window.onload = () => {
     }, 900);
   }
 };
-</script>
-
-<script>
-  // SDK'nın yüklenip yüklenmediğini sürekli kontrol eden fonksiyon
+  // Farcaster SDK Hazır Bildirimi (Döngüsel Kontrol)
   function notifyFarcasterReady() {
     if (window.farcaster && window.farcaster.sdk) {
-      // SDK hazırsa bildirim gönder
       window.farcaster.sdk.actions.ready();
-      console.log("Farcaster SDK: Başarıyla 'Ready' dendi.");
+      console.log("Farcaster SDK: Başarıyla 'Ready' sinyali gönderildi.");
     } else {
-      // SDK henüz yüklenmediyse 100ms sonra tekrar dene
+      // SDK henüz yüklenmediyse 100ms sonra tekrar kontrol et
       setTimeout(notifyFarcasterReady, 100);
     }
   }
 
-  // Sayfa açılır açılmaz kontrolü başlat
+  // Fonksiyonu başlat
   notifyFarcasterReady();
 </script>
 </body>
