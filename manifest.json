@@ -14,10 +14,10 @@
   "frame": {
     "version": "next",
     "name": "Base Fun dApp",
-    "iconUrl": "https://base-fun-dapp.vercel.app/icon-192.png",
-    "homeUrl": "https://base-fun-dapp.vercel.app",
-    "splashImageUrl": "https://base-fun-dapp.vercel.app/splash.png",
+    "iconUrl": "https://basefun-app.vercel.app/icon-192.png",
+    "homeUrl": "https://basefun-app.vercel.app",
+    "splashImageUrl": "https://basefun-app.vercel.app/splash.png",
     "splashBackgroundColor": "#0052FF",
-    "webhookUrl": "https://base-fun-dapp.vercel.app/api/webhook"
+    "webhookUrl": "https://basefun-app.vercel.app/api/webhook"
   }
 }
