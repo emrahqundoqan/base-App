@@ -862,5 +862,14 @@ window.onload = () => {
   }
 };
 </script>
+
+<script>
+      window.addEventListener('load', () => {
+        if (window.farcaster && window.farcaster.sdk) {
+          window.farcaster.sdk.actions.ready();
+          console.log("Farcaster SDK: Ready sinyali gönderildi.");
+        }
+      });
+    </script>
 </body>
 </html>
