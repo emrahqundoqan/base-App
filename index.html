@@ -861,18 +861,20 @@ window.onload = () => {
     }, 900);
   }
 };
-  // Farcaster SDK Hazır Bildirimi (Döngüsel Kontrol)
+// Farcaster SDK Hazır Bildirimi (Garantili Kontrol)
   function notifyFarcasterReady() {
-    if (window.farcaster && window.farcaster.sdk) {
-      window.farcaster.sdk.actions.ready();
+    // Hem window.sdk hem de window.farcaster.sdk kontrol edilir
+    const fcSDK = window.sdk || (window.farcaster && window.farcaster.sdk);
+    
+    if (fcSDK && fcSDK.actions) {
+      fcSDK.actions.ready();
       console.log("Farcaster SDK: Başarıyla 'Ready' sinyali gönderildi.");
     } else {
-      // SDK henüz yüklenmediyse 100ms sonra tekrar kontrol et
+      // SDK henüz bulunamadıysa 100ms sonra tekrar kontrol et
       setTimeout(notifyFarcasterReady, 100);
     }
   }
 
-  // Fonksiyonu başlat
   notifyFarcasterReady();
 </script>
 </body>
