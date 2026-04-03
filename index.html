@@ -861,7 +861,21 @@ window.onload = () => {
     }, 900);
   }
 };
- 
+// Farcaster SDK Hazır Bildirimi (Garantili Kontrol)
+  function notifyFarcasterReady() {
+    // Hem window.sdk hem de window.farcaster.sdk kontrol edilir
+    const fcSDK = window.sdk || (window.farcaster && window.farcaster.sdk);
+    
+    if (fcSDK && fcSDK.actions) {
+      fcSDK.actions.ready();
+      console.log("Farcaster SDK: Başarıyla 'Ready' sinyali gönderildi.");
+    } else {
+      // SDK henüz bulunamadıysa 100ms sonra tekrar kontrol et
+      setTimeout(notifyFarcasterReady, 100);
+    }
+  }
+
+  notifyFarcasterReady();
 </script>
 </body>
 </html>
