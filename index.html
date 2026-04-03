@@ -9,22 +9,27 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/icon-512.png">
 <meta name="description" content="Base zincirinde günlük check-in, GM/GN, zar oyunu ve şanslı çark. XP kazan, seviye atla!"/>
 
+<!-- Open Graph -->
 <meta property="og:title" content="Base Fun dApp"/>
 <meta property="og:description" content="Base zincirinde günlük check-in, GM/GN, zar oyunu ve şanslı çark. XP kazan, seviye atla!"/>
 <meta property="og:image" content="https://basefun-app.vercel.app/og.png"/>
 <meta property="og:url" content="https://basefun-app.vercel.app/"/>
 <meta property="og:type" content="website"/>
 
+<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Base Fun dApp"/>
 <meta name="twitter:description" content="Base zincirinde günlük check-in, XP kazan, seviye atla!"/>
 <meta name="twitter:image" content="https://basefun-app.vercel.app/og.png"/>
 
+<!-- Farcaster Frame v2 / Mini App -->
 <meta name="fc:frame" content='{"version":"next","imageUrl":"https://basefun-app.vercel.app/og.png","button":{"title":"🎮 Oyna!","action":{"type":"launch_frame","name":"Base Fun dApp","url":"https://basefun-app.vercel.app","splashImageUrl":"https://basefun-app.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}' />
+<!-- PWA -->
 <meta name="theme-color" content="#0052FF"/>
 <link rel="manifest" href="/manifest.json"/>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<!-- Farcaster Frame SDK (Mini App desteği için) -->
 <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@latest/dist/index.umd.min.js"></script>
 
 <style>
@@ -59,7 +64,10 @@
 html{-webkit-tap-highlight-color:transparent}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;min-height:100dvh}
 
+/* ─── WRAP ─── */
 .wrap{max-width:520px;margin:0 auto;padding:20px 16px 72px}
+
+/* ─── HEADER ─── */
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:.5px solid var(--bdr)}
 .logo{width:42px;height:42px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 4px rgba(0,82,255,.12)}
 .hdr-txt h1{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:-.3px}
@@ -71,11 +79,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .dot.blink{animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 
+/* ─── NETWORK WARNING ─── */
 .nwrn{background:var(--warn-light);border:.5px solid #fcd34d;border-radius:var(--rs);padding:11px 14px;font-size:13px;color:#92400E;margin-bottom:14px;display:flex;align-items:center;gap:8px;display:none}
 .nwrn.on{display:flex}
 @media(prefers-color-scheme:dark){.nwrn{color:#fcd34d}}
 .nwrn button{margin-left:auto;background:var(--warn);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;flex-shrink:0}
 
+/* ─── WALLET CARD ─── */
 .wlt-card{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
 .wlt-info{flex:1;min-width:0}
 .wlt-info .lbl{font-size:11px;color:var(--tx2);font-weight:500}
@@ -85,6 +95,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .btn-con:active{transform:scale(.97)}
 .btn-con.off{background:var(--bg3);color:var(--tx2);border:.5px solid var(--bdr)}
 
+/* ─── TABS ─── */
 .tabs{display:flex;gap:2px;background:var(--bg2);border:.5px solid var(--bdr);border-radius:10px;padding:4px;margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;min-width:64px;padding:8px 6px;border:none;background:transparent;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:var(--tx2);transition:all .18s;white-space:nowrap;font-family:'DM Sans',sans-serif}
@@ -92,8 +103,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .tab-admin{display:none!important;color:var(--red)!important;font-weight:700!important}
 .tab-admin.visible{display:block!important}
 
+/* ─── PANES ─── */
 .pane{display:none}.pane.on{display:block}
 
+/* ─── CARDS ─── */
 .card{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
 .ctitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);margin-bottom:14px}
 .irow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:.5px solid var(--bdr);font-size:13px}
@@ -101,43 +114,55 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .irow .il{color:var(--tx2)}
 .irow .iv{font-weight:600;font-family:'Space Mono',monospace;font-size:12px}
 
+/* ─── STAT GRID ─── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .sc{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--r);padding:18px 16px;text-align:center;box-shadow:var(--shadow)}
 .sn{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;line-height:1}
 .sl{font-size:12px;color:var(--tx2);margin-top:6px;font-weight:500}
 
+/* ─── BUTTONS ─── */
 .abtn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;font-family:'DM Sans',sans-serif}
 .abtn:active{transform:scale(.98)}
 .abtn-dp{background:var(--blue);color:#fff}
 .abtn-dp:hover:not(:disabled){background:var(--blue-dark)}
 .abtn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
+/* ─── STATUS ─── */
 .sts{margin-top:14px;padding:12px 14px;border-radius:var(--rs);font-size:13px;display:none;align-items:flex-start;gap:9px}
 .sts.on{display:flex}
 .sts.pnd{background:var(--warn-light);color:#92400E;border:.5px solid #fcd34d}
 .sts.ok{background:var(--green-light);color:#065F46;border:.5px solid #6ee7b7}
 .sts.err{background:var(--red-light);color:#7F1D1D;border:.5px solid #fca5a5}
-
+@media(prefers-color-scheme:dark){
+  .sts.pnd{color:#fcd34d}
+  .sts.ok{color:#34d399}
+  .sts.err{color:#fca5a5}
+}
 .spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin_anim .65s linear infinite;flex-shrink:0}
 @keyframes spin_anim{to{transform:rotate(360deg)}}
 
+/* ─── INFO BOX ─── */
 .fbox{display:flex;justify-content:space-between;align-items:center;border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px}
 .fbox-dp{background:var(--blue-light);border:.5px solid rgba(0,82,255,.25)}
 
+/* ─── GM/GN ─── */
 .gm-gn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .gm-card{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
 .gm-card .ctitle{margin-bottom:16px}
 .gm-icon{font-size:40px;text-align:center;margin-bottom:12px}
 
+/* ─── DICE ─── */
 .dice-masa{background:linear-gradient(145deg,#1a7a42,#0d4a28);border-radius:16px;border:6px solid #8B6914;padding:32px 20px;margin-bottom:14px;display:flex;justify-content:center;gap:40px;min-height:150px;align-items:center}
 .dice-box{width:80px;height:80px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:3px 4px 12px rgba(0,0,0,.5);transition:background .2s}
 .dice-res{text-align:center;font-weight:700;font-size:18px;min-height:28px;margin-bottom:10px;font-family:'Space Mono',monospace}
 
+/* ─── WHEEL ─── */
 .wheel-wrapper{position:relative;display:inline-block;margin-bottom:15px}
 .wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:24px;z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
 #wheel-cv{border-radius:50%;box-shadow:0 4px 24px rgba(0,0,0,.2)}
 .wheel-res{font-weight:700;font-size:18px;min-height:28px;margin-bottom:10px;font-family:'Space Mono',monospace;text-align:center}
 
+/* ─── MODAL ─── */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:16px}
 .mbg.on{opacity:1;pointer-events:all}
 .mdl{background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:340px;max-height:80vh;overflow-y:auto;border:.5px solid var(--bdr);box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -154,15 +179,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .mdl-cls{width:100%;margin-top:12px;padding:12px;background:var(--bg2);border:.5px solid var(--bdr);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;color:var(--tx2);font-family:'DM Sans',sans-serif;transition:all .15s}
 .mdl-cls:hover{background:var(--bg3);color:var(--tx)}
 
+/* ─── TOAST ─── */
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:99999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ─── FARCASTER BADGE ─── */
 .fc-badge{display:flex;align-items:center;gap:8px;padding:10px 14px;background:linear-gradient(135deg,#8465E6 0%,#6B45D9 100%);border-radius:var(--rs);color:#fff;font-size:13px;font-weight:600;margin-bottom:16px;cursor:pointer;transition:opacity .15s}
 .fc-badge:hover{opacity:.9}
 .fc-badge svg{flex-shrink:0}
 
+/* ─── LEVEL BADGE ─── */
 .lvl-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700;background:var(--blue-light);color:var(--blue)}
 
+/* ─── SAFE AREA ─── */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 }
@@ -171,6 +200,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 <body>
 
 <div class="wrap">
+
+  <!-- HEADER -->
   <div class="hdr">
     <div class="logo">
       <svg viewBox="0 0 32 32" fill="none" width="24" height="24">
@@ -188,11 +219,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
+  <!-- NETWORK WARNING -->
   <div class="nwrn" id="net-warn">
     ⚠️ Lütfen Base Mainnet'e geçin.
     <button onclick="switchToBase()">Ağı Değiştir</button>
   </div>
 
+  <!-- WALLET CARD -->
   <div class="wlt-card">
     <div class="wlt-info">
       <div class="lbl">Cüzdan</div>
@@ -201,6 +234,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <button class="btn-con" id="con-btn" onclick="handleWalletAction()">Bağlan</button>
   </div>
 
+  <!-- TABS -->
   <div class="tabs">
     <button class="tab on" id="tab-checkin" onclick="switchTab('checkin')">📅 Check-in</button>
     <button class="tab" id="tab-gm" onclick="switchTab('gm')">☀️ GM/GN</button>
@@ -209,33 +243,83 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <button class="tab tab-admin" id="tab-admin" onclick="switchTab('admin')">🔑 Admin</button>
   </div>
 
+  <!-- ─── PANE: CHECK-IN ─── -->
   <div class="pane on" id="pane-checkin">
     <div class="g2">
-      <div class="sc"><div class="sn" style="color:var(--blue)" id="ck-streak">0</div><div class="sl">🔥 Günlük Seri</div></div>
-      <div class="sc"><div class="sn" style="color:var(--green)" id="ck-total">0</div><div class="sl">⚡ Toplam XP</div></div>
+      <div class="sc">
+        <div class="sn" style="color:var(--blue)" id="ck-streak">0</div>
+        <div class="sl">🔥 Günlük Seri</div>
+      </div>
+      <div class="sc">
+        <div class="sn" style="color:var(--green)" id="ck-total">0</div>
+        <div class="sl">⚡ Toplam XP</div>
+      </div>
     </div>
     <div class="card">
       <div class="ctitle">Profil & XP Bilgisi</div>
-      <div class="irow"><span class="il">Seviye</span><span id="xp-level-global" class="iv lvl-badge">🥉 Bronz</span></div>
-      <div class="irow"><span class="il">Günlük Sıfırlanma</span><span class="iv">03:00 (TR)</span></div>
-      <div class="irow" style="border-bottom:none"><span class="il">Durum</span><span id="ck-status" class="iv">Cüzdan bekleniyor</span></div>
-      <div class="fbox fbox-dp" style="margin-top:14px"><span style="color:var(--tx2)">Ücret</span><span style="font-weight:700;font-family:'Space Mono',monospace">0.00001 ETH</span></div>
+      <div class="irow">
+        <span class="il">Seviye</span>
+        <span id="xp-level-global" class="iv lvl-badge">🥉 Bronz</span>
+      </div>
+      <div class="irow">
+        <span class="il">Günlük Sıfırlanma</span>
+        <span class="iv">03:00 (TR)</span>
+      </div>
+      <div class="irow" style="border-bottom:none">
+        <span class="il">Durum</span>
+        <span id="ck-status" class="iv">Cüzdan bekleniyor</span>
+      </div>
+
+      <div class="fbox fbox-dp" style="margin-top:14px">
+        <span style="color:var(--tx2)">Ücret</span>
+        <span style="font-weight:700;font-family:'Space Mono',monospace">0.00001 ETH</span>
+      </div>
+
       <button class="abtn abtn-dp" id="ck-btn" onclick="doCheckIn()">📅 Check-in Yap</button>
       <div class="sts" id="ck-sts"></div>
     </div>
-  </div>
 
-  <div class="pane" id="pane-gm">
-    <div class="fbox fbox-dp" style="margin-bottom:16px"><span style="color:var(--tx2)">Mesaj ücreti</span><span style="font-weight:700;font-family:'Space Mono',monospace">0.00001 ETH</span></div>
-    <div class="gm-gn-grid">
-      <div class="gm-card"><div class="gm-icon">☀️</div><button class="abtn" style="background:var(--gold);color:#fff" onclick="sendMsg('gm')">☀️ GM!</button><div class="sts" id="gm-sts"></div></div>
-      <div class="gm-card"><div class="gm-icon">🌙</div><button class="abtn" style="background:var(--purple);color:#fff" onclick="sendMsg('gn')">🌙 GN!</button><div class="sts" id="gn-sts"></div></div>
+    <!-- XP Level Rehberi -->
+    <div class="card">
+      <div class="ctitle">XP Seviye Rehberi</div>
+      <div class="irow"><span class="il">🥉 Bronz</span><span class="iv">0 – 999 XP</span></div>
+      <div class="irow"><span class="il">🥈 Gümüş</span><span class="iv">1.000 – 4.999 XP</span></div>
+      <div class="irow"><span class="il">🥇 Altın</span><span class="iv">5.000 – 9.999 XP</span></div>
+      <div class="irow"><span class="il">💎 Platin</span><span class="iv">10.000 – 49.999 XP</span></div>
+      <div class="irow"><span class="il">👑 Elmas</span><span class="iv">50.000+ XP</span></div>
     </div>
   </div>
 
+  <!-- ─── PANE: GM/GN ─── -->
+  <div class="pane" id="pane-gm">
+    <div class="fbox fbox-dp" style="margin-bottom:16px">
+      <span style="color:var(--tx2)">Her mesaj ücreti</span>
+      <span style="font-weight:700;font-family:'Space Mono',monospace">0.00001 ETH</span>
+    </div>
+    <div class="gm-gn-grid">
+      <div class="gm-card">
+        <div class="gm-icon">☀️</div>
+        <div class="ctitle" style="text-align:center">GM Gönder</div>
+        <button class="abtn" style="background:var(--gold);color:#fff;font-size:14px" onclick="sendMsg('gm')">☀️ GM!</button>
+        <div class="sts" id="gm-sts"></div>
+      </div>
+      <div class="gm-card">
+        <div class="gm-icon">🌙</div>
+        <div class="ctitle" style="text-align:center">GN Gönder</div>
+        <button class="abtn" style="background:var(--purple);color:#fff;font-size:14px" onclick="sendMsg('gn')">🌙 GN!</button>
+        <div class="sts" id="gn-sts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PANE: GAME (DICE) ─── -->
   <div class="pane" id="pane-game">
     <div class="card">
       <div class="ctitle">🎲 Zar Oyunu</div>
+      <div class="fbox fbox-dp">
+        <span style="color:var(--tx2)">Her atış ücreti</span>
+        <span style="font-weight:700;font-family:'Space Mono',monospace">0.00005 ETH</span>
+      </div>
       <div class="dice-masa">
         <div class="dice-box" id="d1-box"><svg id="d1-svg" width="60" height="60"></svg></div>
         <div class="dice-box" id="d2-box"><svg id="d2-svg" width="60" height="60"></svg></div>
@@ -246,31 +330,63 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
+  <!-- ─── PANE: WHEEL ─── -->
   <div class="pane" id="pane-wheel">
     <div class="card" style="text-align:center">
       <div class="ctitle">🎡 Şanslı Çark</div>
-      <div class="wheel-wrapper"><div class="wheel-pointer">▼</div><canvas id="wheel-cv" width="280" height="280"></canvas></div>
+      <div class="fbox fbox-dp" style="text-align:left">
+        <span style="color:var(--tx2)">Her çevirme ücreti</span>
+        <span style="font-weight:700;font-family:'Space Mono',monospace">0.00005 ETH</span>
+      </div>
+      <div class="wheel-wrapper">
+        <div class="wheel-pointer">▼</div>
+        <canvas id="wheel-cv" width="280" height="280"></canvas>
+      </div>
       <div class="wheel-res" id="wheel-res"></div>
       <button class="abtn abtn-dp" id="spin-btn" onclick="spinWheel()">🎡 Çarkı Çevir!</button>
       <div class="sts" id="wheel-sts"></div>
     </div>
   </div>
 
+  <!-- ─── PANE: ADMIN ─── -->
   <div class="pane" id="pane-admin">
     <div class="card">
       <div class="ctitle">🔑 Admin Paneli</div>
-      <div class="irow"><span class="il">Toplam</span><span id="bal-total" class="iv" style="color:var(--blue)">— ETH</span></div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:16px;background:var(--red-light);padding:10px;border-radius:var(--rs);border:.5px solid #fca5a5">
+        ⚠️ Bu panel yalnızca size özeldir. Biriken ETH'leri buradan çekebilirsiniz.
+      </p>
+      <div class="irow"><span class="il">Check-in Kasası</span><span id="bal-ck" class="iv">— ETH</span></div>
+      <div class="irow"><span class="il">GM Kasası</span><span id="bal-gm" class="iv">— ETH</span></div>
+      <div class="irow"><span class="il">GN Kasası</span><span id="bal-gn" class="iv">— ETH</span></div>
+      <div class="irow"><span class="il">Zar Oyunu Kasası</span><span id="bal-dice" class="iv">— ETH</span></div>
+      <div class="irow"><span class="il">Çark Oyunu Kasası</span><span id="bal-wheel" class="iv">— ETH</span></div>
+      <div class="irow" style="border-bottom:none;padding-top:12px">
+        <span style="font-weight:700">Toplam</span>
+        <span id="bal-total" class="iv" style="color:var(--blue)">— ETH</span>
+      </div>
       <button class="abtn" style="background:var(--red);color:#fff;margin-top:16px" onclick="withdrawAll()">💰 Tüm ETH'leri Çek</button>
-      <button class="abtn" style="background:var(--bg2);color:var(--tx);margin-top:8px" onclick="updateAdminStats()">🔄 Yenile</button>
+      <button class="abtn" style="background:var(--bg2);color:var(--tx);border:.5px solid var(--bdr);margin-top:8px" onclick="updateAdminStats()">🔄 Bakiyeleri Yenile</button>
       <div class="sts" id="admin-sts"></div>
     </div>
   </div>
+
+</div><!-- /wrap -->
+
+<!-- MODAL -->
+<div class="mbg" id="modal-bg" onclick="handleModalBgClick(event)">
+  <div class="mdl">
+    <h2>Cüzdan Seçin</h2>
+    <div class="mdl-sub">Base Mainnet'e bağlanmak için bir cüzdan seçin</div>
+    <div id="wlt-list"><div style="text-align:center;color:var(--tx2);padding:20px 0;font-size:13px">🔍 Cüzdan aranıyor...</div></div>
+    <button class="mdl-cls" onclick="closeModal()">Kapat</button>
+  </div>
 </div>
 
-<div class="mbg" id="modal-bg" onclick="handleModalBgClick(event)"><div class="mdl"><h2>Cüzdan Seçin</h2><div id="wlt-list"></div><button class="mdl-cls" onclick="closeModal()">Kapat</button></div></div>
+<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
+// ─── KONTRAT ADRESLERİ ───
 const ADMIN_ADDRESS = '0xca37E522b57FEebc6f371EA500ecBf1e408FfD2c';
 const ADDR = {
   CHECKIN: '0xb4e5E1C7D4b0e846645F49995024D570A0A6218c',
@@ -279,40 +395,107 @@ const ADDR = {
   WHEEL:   '0x39b91858e45C33Bd6407c27449fdC773EE288cdC',
   DICE:    '0xB1c153F5b8eB0AB275c4ed721606D814750EFea9'
 };
+
 const SEGMENTS_XP = [10, 25, 50, 5, 30, 10, 55, 100, 15, 20, 35, 40, 60, 65, 70, 75];
-const COLORS = ["#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316"];
+const COLORS = [
+  "#6366f1","#0ea5e9","#10b981","#f59e0b",
+  "#ef4444","#8b5cf6","#06b6d4","#f97316",
+  "#6366f1","#0ea5e9","#10b981","#f59e0b",
+  "#ef4444","#8b5cf6","#06b6d4","#f97316"
+];
+
 const ABIS = {
-  CK: ["function checkIn() payable","function userStreaks(address) view returns (uint256)","function totalUserCheckIns(address) view returns (uint256)","function lastCheckIn(address) view returns (uint256)","function withdraw() external"],
-  MSG: ["function gm(string) payable","function gn(string) payable","function withdraw() external"],
+  CK:    ["function checkIn() payable","function userStreaks(address) view returns (uint256)","function totalUserCheckIns(address) view returns (uint256)","function lastCheckIn(address) view returns (uint256)","function withdraw() external"],
+  MSG:   ["function gm(string) payable","function gn(string) payable","function withdraw() external"],
   WHEEL: ["function spin() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event WheelSpun(address indexed player, uint8 segment, uint256 xpEarned, uint256 totalXP)"],
-  DICE: ["function rollDice() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event DiceRolled(address indexed player, uint8 d1, uint8 d2, bool isD, uint256 xp, uint256 txp)"]
+  DICE:  ["function rollDice() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event DiceRolled(address indexed player, uint8 d1, uint8 d2, bool isD, uint256 xp, uint256 txp)"]
 };
 
-let acct, prov, sgn, rawProv, wheelAngle = 0, wlts = {};
+let acct, prov, sgn, rawProv, wheelAngle = 0;
+let wlts = {};
+let toastTimer;
 
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+// ─── FARCASTER FRAME SDK ───
+(async () => {
+  try {
+    if (window.sdk) {
+      await window.sdk.actions.ready();
+    }
+  } catch(e) {}
+})();
 
-window.addEventListener("eip6963:announceProvider", (e) => { wlts[e.detail.info.rdns] = e.detail; renderWallets(); });
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── WALLET (EIP-6963) ───
+window.addEventListener("eip6963:announceProvider", (e) => {
+  wlts[e.detail.info.rdns] = e.detail;
+  renderWallets();
+});
 window.dispatchEvent(new Event("eip6963:requestProvider"));
 
 function renderWallets() {
-  const list = document.getElementById('wlt-list'); list.innerHTML = "";
+  const list = document.getElementById('wlt-list');
+  list.innerHTML = "";
+
   Object.values(wlts).forEach(w => {
-    const el = document.createElement('div'); el.className = 'wopt';
-    el.innerHTML = `<div class="wico"><img src="${w.info.icon}"/></div><div><div class="wnm">${w.info.name}</div></div>`;
+    const el = document.createElement('div');
+    el.className = 'wopt';
+    el.innerHTML = `
+      <div class="wico"><img src="${w.info.icon}" alt="${w.info.name}"/></div>
+      <div>
+        <div class="wnm">${w.info.name}</div>
+        <div class="wrdns">${w.info.rdns}</div>
+      </div>`;
     el.onclick = () => connectWith(w.provider, w.info.rdns);
     list.appendChild(el);
   });
+
+  if (window.ethereum && Object.keys(wlts).length === 0) {
+    const el = document.createElement('div');
+    el.className = 'wopt';
+    el.innerHTML = `<div class="wico"><span>🦊</span></div><div><div class="wnm">Tarayıcı Cüzdanı</div></div>`;
+    el.onclick = () => connectWith(window.ethereum, "browser");
+    list.appendChild(el);
+  }
+
+  if (Object.keys(wlts).length === 0 && !window.ethereum) {
+    list.innerHTML = `<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--tx2)">
+      Cüzdan bulunamadı.<br><br>
+      <a href="https://metamask.io" target="_blank" style="color:var(--blue)">MetaMask</a> veya 
+      <a href="https://www.coinbase.com/wallet" target="_blank" style="color:var(--blue)">Coinbase Wallet</a> yükleyin.
+    </div>`;
+  }
 }
 
-async function handleWalletAction() { if (acct) window.location.reload(); else openModal(); }
+async function handleWalletAction() {
+  if (acct) disconnect();
+  else openModal();
+}
 
 async function connectWith(provider, rdns) {
   try {
-    rawProv = provider; const accounts = await rawProv.request({ method: 'eth_requestAccounts' });
-    acct = accounts[0]; prov = new ethers.BrowserProvider(rawProv); sgn = await prov.getSigner();
-    updateUIConnected(); closeModal(); checkNetwork();
-  } catch(e) { showToast('❌ Hata.'); }
+    rawProv = provider;
+    const accounts = await rawProv.request({ method: 'eth_requestAccounts' });
+    acct = accounts[0];
+    prov = new ethers.BrowserProvider(rawProv);
+    sgn = await prov.getSigner();
+    localStorage.setItem('lastWallet', rdns);
+    updateUIConnected();
+    closeModal();
+    checkNetwork();
+    rawProv.on('chainChanged', () => window.location.reload());
+    rawProv.on('accountsChanged', (a) => a.length ? window.location.reload() : disconnect());
+  } catch(e) {
+    const msg = e.code === 4001 ? 'Bağlantı reddedildi.' : 'Bağlantı hatası.';
+    showToast('❌ ' + msg);
+  }
 }
 
 async function checkNetwork() {
@@ -320,119 +503,365 @@ async function checkNetwork() {
   const chainId = await rawProv.request({ method: 'eth_chainId' });
   const isBase = parseInt(chainId, 16) === 8453;
   document.getElementById('net-warn').className = 'nwrn' + (isBase ? '' : ' on');
-  document.getElementById('net-dot').className = 'dot blink ' + (isBase ? 'green' : 'red');
+  const dot = document.getElementById('net-dot');
+  dot.className = 'dot blink ' + (isBase ? 'green' : 'red');
   document.getElementById('net-name').textContent = isBase ? 'Base Mainnet' : 'Yanlış Ağ';
 }
 
 function updateUIConnected() {
   document.getElementById('wlt-adr').textContent = acct.slice(0,6) + '...' + acct.slice(-4);
-  document.getElementById('con-btn').textContent = "Çıkış";
-  if (acct.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) document.getElementById('tab-admin').classList.add('visible');
+  const btn = document.getElementById('con-btn');
+  btn.textContent = "Bağlantıyı Kes";
+  btn.classList.add('off');
+
+  if (acct.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) {
+    const adminTab = document.getElementById('tab-admin');
+    adminTab.classList.add('visible');
+    adminTab.style.display = 'block';
+    updateAdminStats();
+  }
   updateAllStats();
+}
+
+function disconnect() {
+  localStorage.removeItem('lastWallet');
+  window.location.reload();
+}
+
+async function switchToBase() {
+  try {
+    await rawProv.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
+  } catch(e) {
+    if (e.code === 4902) {
+      await rawProv.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: '0x2105',
+          chainName: 'Base Mainnet',
+          nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+          rpcUrls: ['https://mainnet.base.org'],
+          blockExplorerUrls: ['https://basescan.org']
+        }]
+      });
+    }
+  }
+}
+
+// ─── STATS ───
+async function updateAdminStats() {
+  if (!acct || acct.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) return;
+  try {
+    const [ckBal, gmBal, gnBal, diceBal, wheelBal] = await Promise.all([
+      prov.getBalance(ADDR.CHECKIN),
+      prov.getBalance(ADDR.GM),
+      prov.getBalance(ADDR.GN),
+      prov.getBalance(ADDR.DICE),
+      prov.getBalance(ADDR.WHEEL),
+    ]);
+
+    const fmt = v => Number(ethers.formatEther(v)).toFixed(6) + ' ETH';
+    document.getElementById('bal-ck').textContent    = fmt(ckBal);
+    document.getElementById('bal-gm').textContent    = fmt(gmBal);
+    document.getElementById('bal-gn').textContent    = fmt(gnBal);
+    document.getElementById('bal-dice').textContent  = fmt(diceBal);
+    document.getElementById('bal-wheel').textContent = fmt(wheelBal);
+
+    const total = ckBal + gmBal + gnBal + diceBal + wheelBal;
+    document.getElementById('bal-total').textContent = fmt(total);
+  } catch(e) {}
+}
+
+async function withdrawAll() {
+  setSts('admin-sts', 'pnd', 'İşlemler gönderiliyor...');
+  try {
+    const contracts = [
+      { c: new ethers.Contract(ADDR.CHECKIN, ABIS.CK, sgn),  a: ADDR.CHECKIN },
+      { c: new ethers.Contract(ADDR.GM,      ABIS.MSG, sgn), a: ADDR.GM },
+      { c: new ethers.Contract(ADDR.GN,      ABIS.MSG, sgn), a: ADDR.GN },
+      { c: new ethers.Contract(ADDR.DICE,    ABIS.DICE, sgn),  a: ADDR.DICE },
+      { c: new ethers.Contract(ADDR.WHEEL,   ABIS.WHEEL, sgn), a: ADDR.WHEEL },
+    ];
+    let withdrawn = 0;
+    for (const { c, a } of contracts) {
+      const bal = await prov.getBalance(a);
+      if (bal > 0n) {
+        const tx = await c.withdraw();
+        await tx.wait();
+        withdrawn++;
+      }
+    }
+    setSts('admin-sts', 'ok', `${withdrawn} kontrat başarıyla çekildi!`);
+    showToast('✅ ETH çekme tamamlandı!');
+    updateAdminStats();
+  } catch(e) {
+    setSts('admin-sts', 'err', 'Hata: ' + (e.reason || e.message || '').slice(0, 60));
+  }
 }
 
 async function updateAllStats() {
   if (!acct) return;
   try {
-    const ck = new ethers.Contract(ADDR.CHECKIN, ABIS.CK, prov);
-    const wc = new ethers.Contract(ADDR.WHEEL, ABIS.WHEEL, prov);
-    const dc = new ethers.Contract(ADDR.DICE, ABIS.DICE, prov);
-    const [streak, total, last] = await Promise.all([ck.userStreaks(acct), ck.totalUserCheckIns(acct), ck.lastCheckIn(acct)]);
-    const wS = await wc.getPlayerStats(acct);
-    const dS = await dc.getPlayerStats(acct);
+    const ck  = new ethers.Contract(ADDR.CHECKIN, ABIS.CK, prov);
+    const wc  = new ethers.Contract(ADDR.WHEEL, ABIS.WHEEL, prov);
+    const dc  = new ethers.Contract(ADDR.DICE, ABIS.DICE, prov);
+
+    let cRes = [0n, 0n, 0n], wS = [0n], dS = [0n];
+    try { cRes = await Promise.all([ck.userStreaks(acct), ck.totalUserCheckIns(acct), ck.lastCheckIn(acct)]); } catch(e){}
+    try { wS = await wc.getPlayerStats(acct); } catch(e){}
+    try { dS = await dc.getPlayerStats(acct); } catch(e){}
+
     const totalXP = Number(wS[0] || 0n) + Number(dS[0] || 0n);
-    document.getElementById('ck-streak').textContent = streak.toString();
+    document.getElementById('ck-streak').textContent = cRes[0].toString();
     document.getElementById('ck-total').textContent = totalXP.toLocaleString('tr-TR');
     document.getElementById('xp-level-global').textContent = getLevel(totalXP);
-    const now = new Date(); let reset = new Date(); reset.setHours(3,0,0,0); if (now < reset) reset.setDate(reset.getDate()-1);
-    const canCk = (Number(last) * 1000) < reset.getTime();
+
+    const lastTime = Number(cRes[2]);
+    const now = new Date();
+    let reset = new Date(); reset.setHours(3, 0, 0, 0);
+    if (now < reset) reset.setDate(reset.getDate() - 1);
+    const canCk = (lastTime * 1000) < reset.getTime();
     document.getElementById('ck-status').textContent = canCk ? '⏳ Bekliyor' : '✅ Yapıldı';
-    document.getElementById('ck-btn').disabled = !canCk;
+    const ckBtn = document.getElementById('ck-btn');
+    ckBtn.disabled = !canCk;
   } catch(e) {}
 }
 
+// ─── LOGIC ───
 async function doCheckIn() {
-  setSts('ck-sts','pnd','İşleniyor...');
+  if (!acct) { openModal(); return; }
+  setSts('ck-sts', 'pnd', 'İmzalanıyor...');
   try {
-    const tx = await (new ethers.Contract(ADDR.CHECKIN, ABIS.CK, sgn)).checkIn({ value: ethers.parseEther('0.00001') });
-    await tx.wait(); setSts('ck-sts','ok','✅ Başarılı!'); updateAllStats();
-  } catch(e) { setSts('ck-sts','err','❌ Hata!'); }
+    const ck = new ethers.Contract(ADDR.CHECKIN, ABIS.CK, sgn);
+    const tx = await ck.checkIn({ value: ethers.parseEther('0.00001') });
+    setSts('ck-sts', 'pnd', 'Zincirde doğrulanıyor...');
+    await tx.wait();
+    setSts('ck-sts', 'ok', '✅ Check-in başarılı! XP kazandın.');
+    showToast('🎉 Check-in tamamlandı!');
+    updateAllStats();
+  } catch(e) {
+    const msg = e.code === 4001 ? 'İşlem reddedildi.' : (e.reason || e.message || '').slice(0, 60);
+    setSts('ck-sts', 'err', '❌ ' + msg);
+  }
 }
 
 async function sendMsg(t) {
-  setSts(t+'-sts','pnd','İmzalanıyor...');
+  if (!acct) { openModal(); return; }
+  setSts(t + '-sts', 'pnd', 'İmzalanıyor...');
   try {
-    const tx = await (new ethers.Contract(t==='gm'?ADDR.GM:ADDR.GN, ABIS.MSG, sgn))[t]("", { value: ethers.parseEther('0.00001') });
-    await tx.wait(); setSts(t+'-sts','ok','✅ Başarılı!');
-  } catch(e) { setSts(t+'-sts','err','❌ Hata!'); }
+    const c = new ethers.Contract(t === 'gm' ? ADDR.GM : ADDR.GN, ABIS.MSG, sgn);
+    const tx = await c[t]("", { value: ethers.parseEther('0.00001') });
+    setSts(t + '-sts', 'pnd', 'Zincirde doğrulanıyor...');
+    await tx.wait();
+    setSts(t + '-sts', 'ok', '✅ ' + (t === 'gm' ? 'GM' : 'GN') + ' gönderildi!');
+    showToast('🌟 ' + (t === 'gm' ? 'Good Morning!' : 'Good Night!'));
+  } catch(e) {
+    const msg = e.code === 4001 ? 'İşlem reddedildi.' : (e.reason || e.message || '').slice(0, 60);
+    setSts(t + '-sts', 'err', '❌ ' + msg);
+  }
 }
 
-const PIP_POS = { 1:[[30,30]], 2:[[15,15],[45,45]], 3:[[15,15],[30,30],[45,45]], 4:[[15,15],[45,15],[15,45],[45,45]], 5:[[15,15],[45,15],[30,30],[15,45],[45,45]], 6:[[15,12],[45,12],[15,30],[45,30],[15,48],[45,48]] };
-function drawDice(s,b,v,h) {
-  document.getElementById(s).innerHTML = (PIP_POS[v]||PIP_POS[1]).map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="${h?'#7c3aed':'#1e293b'}"/>`).join('');
-  document.getElementById(b).style.background = h?'#ede9fe':'#fff';
+// ─── DICE ───
+const PIP_POS = {
+  1: [[30,30]],
+  2: [[15,15],[45,45]],
+  3: [[15,15],[30,30],[45,45]],
+  4: [[15,15],[45,15],[15,45],[45,45]],
+  5: [[15,15],[45,15],[30,30],[15,45],[45,45]],
+  6: [[15,12],[45,12],[15,30],[45,30],[15,48],[45,48]]
+};
+
+function drawDice(svgId, boxId, value, highlight) {
+  const sv = document.getElementById(svgId);
+  const bx = document.getElementById(boxId);
+  sv.innerHTML = (PIP_POS[value] || PIP_POS[1])
+    .map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="${highlight ? '#7c3aed' : '#1e293b'}"/>`)
+    .join('');
+  bx.style.background = highlight ? '#ede9fe' : '#fff';
 }
 
 async function rollDice() {
-  setSts('roll-sts','pnd','Atılıyor...');
+  if (!acct) { openModal(); return; }
+  setSts('roll-sts', 'pnd', 'Zar atılıyor...');
   try {
-    const tx = await (new ethers.Contract(ADDR.DICE, ABIS.DICE, sgn)).rollDice({ value: ethers.parseEther('0.00005') });
+    const c = new ethers.Contract(ADDR.DICE, ABIS.DICE, sgn);
+    const tx = await c.rollDice({ value: ethers.parseEther('0.00005') });
+    const ani = setInterval(() => {
+      drawDice('d1-svg', 'd1-box', Math.floor(Math.random() * 6) + 1);
+      drawDice('d2-svg', 'd2-box', Math.floor(Math.random() * 6) + 1);
+    }, 100);
     const receipt = await tx.wait();
-    const parsed = (new ethers.Interface(ABIS.DICE)).parseLog(receipt.logs.find(l=>l.topics[0]===ethers.id("DiceRolled(address,uint8,uint8,bool,uint256,uint256)")));
-    const d1=Number(parsed.args[1]), d2=Number(parsed.args[2]);
-    drawDice('d1-svg','d1-box',d1,d1===d2); drawDice('d2-svg','d2-box',d2,d1===d2);
-    document.getElementById('dice-res').textContent=`${d1} + ${d2} = ${d1+d2}`;
-    setSts('roll-sts','ok','✅ Başarılı!'); updateAllStats();
-  } catch(e) { setSts('roll-sts','err','❌ Hata!'); }
+    clearInterval(ani);
+
+    const iface = new ethers.Interface(ABIS.DICE);
+    const diceLog = receipt.logs.find(log => {
+      try { return iface.parseLog(log).name === "DiceRolled"; } catch(e) { return false; }
+    });
+
+    if (!diceLog) throw new Error('Event bulunamadı');
+    const parsed = iface.parseLog(diceLog);
+    const d1 = Number(parsed.args[1]);
+    const d2 = Number(parsed.args[2]);
+    const isDouble = d1 === d2;
+
+    drawDice('d1-svg', 'd1-box', d1, isDouble);
+    drawDice('d2-svg', 'd2-box', d2, isDouble);
+    document.getElementById('dice-res').textContent = `${d1} + ${d2} = ${d1 + d2}${isDouble ? ' 🎊 DOUBLE!' : ''}`;
+    setSts('roll-sts', 'ok', isDouble ? '🎊 Çift attın! Bonus XP!' : '✅ Zar atıldı!');
+    if (isDouble) showToast('🎊 Çift! Bonus XP kazandın!');
+    updateAllStats();
+  } catch(e) {
+    const msg = e.code === 4001 ? 'İşlem reddedildi.' : (e.reason || e.message || '').slice(0, 60);
+    setSts('roll-sts', 'err', '❌ ' + msg);
+  }
 }
 
-function drawWheel(a) {
-  const cv=document.getElementById('wheel-cv'),ctx=cv.getContext('2d'),step=(Math.PI*2)/16; ctx.clearRect(0,0,280,280);
-  for(let i=0;i<16;i++) { ctx.beginPath();ctx.moveTo(140,140);ctx.arc(140,140,135,a+i*step,a+(i+1)*step);ctx.fillStyle=COLORS[i];ctx.fill(); }
-  ctx.beginPath();ctx.arc(140,140,18,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();
+// ─── WHEEL ───
+function drawWheel(angle) {
+  const cv = document.getElementById('wheel-cv');
+  const ctx = cv.getContext('2d');
+  const step = (Math.PI * 2) / 16;
+  ctx.clearRect(0, 0, 280, 280);
+
+  for (let i = 0; i < 16; i++) {
+    // Dilim
+    ctx.beginPath();
+    ctx.moveTo(140, 140);
+    ctx.arc(140, 140, 135, angle + i * step, angle + (i + 1) * step);
+    ctx.fillStyle = COLORS[i];
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // XP yazısı
+    ctx.save();
+    ctx.translate(140, 140);
+    ctx.rotate(angle + i * step + step / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Space Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(SEGMENTS_XP[i] + ' XP', 88, 4);
+    ctx.restore();
+  }
+
+  // Merkez daire
+  ctx.beginPath();
+  ctx.arc(140, 140, 18, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.1)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = '#0052FF';
+  ctx.font = 'bold 10px Space Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('BASE', 140, 144);
 }
 
 async function spinWheel() {
-  const btn=document.getElementById('spin-btn');btn.disabled=true;setSts('wheel-sts','pnd','Dönüyor...');
+  if (!acct) { openModal(); return; }
+  const btn = document.getElementById('spin-btn');
+  btn.disabled = true;
+  setSts('wheel-sts', 'pnd', 'İşleniyor...');
   try {
-    const tx = await (new ethers.Contract(ADDR.WHEEL, ABIS.WHEEL, sgn)).spin({ value: ethers.parseEther('0.00005') });
+    const c = new ethers.Contract(ADDR.WHEEL, ABIS.WHEEL, sgn);
+    const tx = await c.spin({ value: ethers.parseEther('0.00005') });
+    setSts('wheel-sts', 'pnd', 'Zincirde doğrulanıyor...');
     const receipt = await tx.wait();
-    const winIdx = Number((new ethers.Interface(ABIS.WHEEL)).parseLog(receipt.logs.find(l=>l.topics[0]===ethers.id("WheelSpun(address,uint8,uint256,uint256)"))).args[1]);
-    const step=Math.PI*2/16, targetA=-(winIdx*step+step/2)-Math.PI/2, totalR=Math.PI*2*7+targetA-(wheelAngle%(Math.PI*2)), startA=wheelAngle, dur=4000, startT=performance.now();
+
+    const iface = new ethers.Interface(ABIS.WHEEL);
+    const wheelLog = receipt.logs.find(log => {
+      try { return iface.parseLog(log).name === "WheelSpun"; } catch(e) { return false; }
+    });
+
+    if (!wheelLog) throw new Error('Event bulunamadı');
+    const parsed = iface.parseLog(wheelLog);
+    const winIdx = Number(parsed.args[1]);
+
+    const step = Math.PI * 2 / 16;
+    const targetA = -(winIdx * step + step / 2) - Math.PI / 2;
+    const totalR = Math.PI * 2 * 7 + targetA - (wheelAngle % (Math.PI * 2));
+    const startA = wheelAngle;
+    const dur = 4500;
+    const startT = performance.now();
+
     function anim(now) {
-      const prog=Math.min((now-startT)/dur,1), ease=1-Math.pow(1-prog,4); wheelAngle=startA+totalR*ease; drawWheel(wheelAngle);
-      if(prog<1) requestAnimationFrame(anim); else { document.getElementById('wheel-res').textContent=`🎉 +${SEGMENTS_XP[winIdx]} XP!`; setSts('wheel-sts','ok','✅ Başarılı!'); btn.disabled=false; updateAllStats(); }
-    } requestAnimationFrame(anim);
-  } catch(e) { setSts('wheel-sts','err','❌ Hata!'); btn.disabled=false; }
+      const prog = Math.min((now - startT) / dur, 1);
+      const ease = 1 - Math.pow(1 - prog, 4);
+      wheelAngle = startA + totalR * ease;
+      drawWheel(wheelAngle);
+      if (prog < 1) {
+        requestAnimationFrame(anim);
+      } else {
+        const xp = SEGMENTS_XP[winIdx];
+        document.getElementById('wheel-res').textContent = `🎉 +${xp} XP kazandın!`;
+        setSts('wheel-sts', 'ok', `✅ Tebrikler! +${xp} XP!`);
+        showToast(`🎡 +${xp} XP kazandın!`);
+        btn.disabled = false;
+        updateAllStats();
+      }
+    }
+    requestAnimationFrame(anim);
+  } catch(e) {
+    const msg = e.code === 4001 ? 'İşlem reddedildi.' : (e.reason || e.message || '').slice(0, 60);
+    setSts('wheel-sts', 'err', '❌ ' + msg);
+    btn.disabled = false;
+  }
 }
 
-async function updateAdminStats() {
-  if (!acct) return;
-  const balances = await Promise.all([prov.getBalance(ADDR.CHECKIN),prov.getBalance(ADDR.GM),prov.getBalance(ADDR.GN),prov.getBalance(ADDR.DICE),prov.getBalance(ADDR.WHEEL)]);
-  const total = balances.reduce((a,b)=>a+b,0n); document.getElementById('bal-total').textContent = Number(ethers.formatEther(total)).toFixed(6) + ' ETH';
+// ─── UI HELPERS ───
+function switchTab(n) {
+  document.querySelectorAll('.tab, .pane').forEach(el => el.classList.remove('on'));
+  document.getElementById('tab-' + n).classList.add('on');
+  document.getElementById('pane-' + n).classList.add('on');
 }
 
-async function withdrawAll() {
-  try {
-    for(let a of [ADDR.CHECKIN,ADDR.GM,ADDR.GN,ADDR.DICE,ADDR.WHEEL]) { if(await prov.getBalance(a)>0n) await (new ethers.Contract(a,["function withdraw() external"],sgn)).withdraw(); }
-    showToast('✅ Çekildi'); updateAdminStats();
-  } catch(e) {}
-}
-
-function switchTab(n) { document.querySelectorAll('.tab, .pane').forEach(el=>el.classList.remove('on')); document.getElementById('tab-'+n).classList.add('on'); document.getElementById('pane-'+n).classList.add('on'); }
 function openModal() { document.getElementById('modal-bg').classList.add('on'); }
 function closeModal() { document.getElementById('modal-bg').classList.remove('on'); }
-function handleModalBgClick(e) { if(e.target.id==='modal-bg') closeModal(); }
-function setSts(i,t,h) { const el=document.getElementById(i); el.className='sts on '+t; el.innerHTML=h; }
-function getLevel(totalXP) { if (totalXP>=50000) return '👑 Elmas'; if (totalXP>=10000) return '💎 Platin'; if (totalXP>=5000) return '🥇 Altın'; if (totalXP>=1000) return '🥈 Gümüş'; return '🥉 Bronz'; }
+function handleModalBgClick(e) { if (e.target === document.getElementById('modal-bg')) closeModal(); }
 
-async function notifyFarcasterReady() {
-  const fcSDK = window.sdk || (window.farcaster && window.farcaster.sdk);
-  if (fcSDK && fcSDK.actions && typeof fcSDK.actions.ready === 'function') { try { await fcSDK.actions.ready(); console.log("Farcaster Ready!"); } catch(e){} }
-  else { setTimeout(notifyFarcasterReady, 100); }
+function setSts(id, type, html) {
+  const el = document.getElementById(id);
+  el.className = 'sts on ' + type;
+  el.innerHTML = (type === 'pnd' ? '<div class="spin"></div>' : '') + '<span>' + html + '</span>';
 }
 
-window.onload = () => { drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); drawWheel(0); notifyFarcasterReady(); };
+function getLevel(xp) {
+  if (xp >= 50000) return '👑 Elmas';
+  if (xp >= 10000) return '💎 Platin';
+  if (xp >= 5000)  return '🥇 Altın';
+  if (xp >= 1000)  return '🥈 Gümüş';
+  return '🥉 Bronz';
+}
+
+// ─── INIT ───
+window.onload = () => {
+  // İlk zar çizimi
+  drawDice('d1-svg', 'd1-box', 1);
+  drawDice('d2-svg', 'd2-box', 1);
+
+  // Çark çizimi
+  drawWheel(0);
+
+  // Wallet listesini doldur
+  setTimeout(() => {
+    if (Object.keys(wlts).length === 0) renderWallets();
+  }, 500);
+
+  // Son bağlı cüzdanı otomatik bağla
+  const last = localStorage.getItem('lastWallet');
+  if (last) {
+    setTimeout(() => {
+      if (last === "browser" && window.ethereum) {
+        connectWith(window.ethereum, "browser");
+      } else if (wlts[last]) {
+        connectWith(wlts[last].provider, last);
+      }
+    }, 900);
+  }
+};
+ 
 </script>
 </body>
 </html>
