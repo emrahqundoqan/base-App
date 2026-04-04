@@ -4,26 +4,24 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Base Fun dApp</title>
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-512.png">
 <meta name="description" content="Base zincirinde günlük check-in, GM/GN, zar oyunu ve şanslı çark. XP kazan, seviye atla!"/>
 
 <!-- Open Graph -->
 <meta property="og:title" content="Base Fun dApp"/>
 <meta property="og:description" content="Base zincirinde günlük check-in, GM/GN, zar oyunu ve şanslı çark. XP kazan, seviye atla!"/>
-<meta property="og:image" content="https://basefun-app.vercel.app/og.png"/>
-<meta property="og:url" content="https://basefun-app.vercel.app/"/>
+<meta property="og:image" content="https://base-fun-dapp.vercel.app/og.png"/>
+<meta property="og:url" content="https://base-fun-dapp.vercel.app"/>
 <meta property="og:type" content="website"/>
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Base Fun dApp"/>
 <meta name="twitter:description" content="Base zincirinde günlük check-in, XP kazan, seviye atla!"/>
-<meta name="twitter:image" content="https://basefun-app.vercel.app/og.png"/>
+<meta name="twitter:image" content="https://base-fun-dapp.vercel.app/og.png"/>
 
 <!-- Farcaster Frame v2 / Mini App -->
-<meta name="fc:frame" content='{"version":"next","imageUrl":"https://basefun-app.vercel.app/og.png","button":{"title":"🎮 Oyna!","action":{"type":"launch_frame","name":"Base Fun dApp","url":"https://basefun-app.vercel.app","splashImageUrl":"https://basefun-app.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}' />
+<meta name="fc:frame" content='{"version":"next","imageUrl":"https://base-fun-dapp.vercel.app/og.png","button":{"title":"🎮 Oyna!","action":{"type":"launch_frame","name":"Base Fun dApp","url":"https://base-fun-dapp.vercel.app","splashImageUrl":"https://base-fun-dapp.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}' />
+
 <!-- PWA -->
 <meta name="theme-color" content="#0052FF"/>
 <link rel="manifest" href="/manifest.json"/>
@@ -861,21 +859,6 @@ window.onload = () => {
     }, 900);
   }
 };
-// Farcaster SDK Hazır Bildirimi (Garantili Kontrol)
-  function notifyFarcasterReady() {
-    // Hem window.sdk hem de window.farcaster.sdk kontrol edilir
-    const fcSDK = window.sdk || (window.farcaster && window.farcaster.sdk);
-    
-    if (fcSDK && fcSDK.actions) {
-      fcSDK.actions.ready();
-      console.log("Farcaster SDK: Başarıyla 'Ready' sinyali gönderildi.");
-    } else {
-      // SDK henüz bulunamadıysa 100ms sonra tekrar kontrol et
-      setTimeout(notifyFarcasterReady, 100);
-    }
-  }
-
-  notifyFarcasterReady();
 </script>
 </body>
 </html>
