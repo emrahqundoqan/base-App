@@ -575,7 +575,9 @@ async function updateAllStats() {
     try { cRes = await Promise.all([ck.userStreaks(acct),ck.totalUserCheckIns(acct),ck.lastCheckIn(acct)]); } catch(e){}
     try { wS = await wc.getPlayerStats(acct); } catch(e){}
     try { dS = await dc.getPlayerStats(acct); } catch(e){}
-    var totalXP = Number(wS[0]||0n) + Number(dS[0]||0n);
+    var checkInCount = Number(cRes[1]||0n);
+    var checkInXP    = checkInCount * 10;
+    var totalXP = checkInXP + Number(wS[0]||0n) + Number(dS[0]||0n);
     document.getElementById('ck-streak').textContent = cRes[0].toString();
     document.getElementById('ck-total').textContent  = totalXP.toLocaleString('tr-TR');
     document.getElementById('xp-level-global').textContent = getLevel(totalXP);
@@ -597,7 +599,7 @@ async function doCheckIn() {
     var tx = await ck.checkIn({ value: ethers.parseEther('0.00001') });
     setSts('ck-sts','pnd','Dogrulanıyor...');
     await tx.wait();
-    setSts('ck-sts','ok','Check-in basarili! XP kazandin.');
+    setSts('ck-sts','ok','Check-in basarili! +10 XP kazandin.');
     showToast('Check-in tamamlandi!');
     updateAllStats();
   } catch(e) {
