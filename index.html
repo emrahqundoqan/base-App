@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Base Fun App</title>
+<title>Base Fun dApp</title>
 <meta name="description" content="Base zincirinde günlük check-in, GM/GN, zar oyunu ve şanslı çark. XP kazan, seviye atla!"/>
 
 <!-- Open Graph -->
@@ -545,24 +545,52 @@ async function updateAdminStats() {
 }
 
 async function withdrawAll() {
-  setSts('admin-sts','pnd','Islemler gonderiliyor...');
-  try {
-    var list = [
-      { c: new ethers.Contract(ADDR.CHECKIN,ABIS.CK,sgn),    a: ADDR.CHECKIN },
-      { c: new ethers.Contract(ADDR.GM,ABIS.MSG,sgn),        a: ADDR.GM },
-      { c: new ethers.Contract(ADDR.GN,ABIS.MSG,sgn),        a: ADDR.GN },
-      { c: new ethers.Contract(ADDR.DICE,ABIS.DICE,sgn),     a: ADDR.DICE },
-      { c: new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn),   a: ADDR.WHEEL }
-    ];
-    var count = 0;
-    for (var i = 0; i < list.length; i++) {
-      var bal = await prov.getBalance(list[i].a);
-      if (bal > 0n) { var tx = await list[i].c.withdraw(); await tx.wait(); count++; }
+  setSts('admin-sts','pnd','Bakiyeler kontrol ediliyor...');
+  var list = [
+    { c: new ethers.Contract(ADDR.CHECKIN,ABIS.CK,sgn),  a: ADDR.CHECKIN, name:'Check-in' },
+    { c: new ethers.Contract(ADDR.GM,ABIS.MSG,sgn),       a: ADDR.GM,      name:'GM'       },
+    { c: new ethers.Contract(ADDR.GN,ABIS.MSG,sgn),       a: ADDR.GN,      name:'GN'       },
+    { c: new ethers.Contract(ADDR.DICE,ABIS.DICE,sgn),    a: ADDR.DICE,    name:'Dice'     },
+    { c: new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn),  a: ADDR.WHEEL,   name:'Wheel'    }
+  ];
+  var success = [], failed = [], skipped = [];
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i];
+    try {
+      var bal = await prov.getBalance(item.a);
+      if (bal === 0n || bal < ethers.parseEther('0.000001')) {
+        skipped.push(item.name);
+        continue;
+      }
+      setSts('admin-sts','pnd', item.name + ' cekiliyor... (' + (i+1) + '/5)');
+      // Gas tahmini yap — kontrat revert edecekse bunu önceden yakala
+      try { await item.c.withdraw.estimateGas(); } catch(ge) {
+        failed.push(item.name + '(gas: ' + (ge.reason||ge.message||'revert').slice(0,30) + ')');
+        continue;
+      }
+      var tx = await item.c.withdraw();
+      await tx.wait();
+      success.push(item.name);
+    } catch(e) {
+      var errMsg = e.reason || e.data?.message || e.message || 'bilinmeyen hata';
+      failed.push(item.name + ': ' + errMsg.slice(0,40));
     }
-    setSts('admin-sts','ok', count + ' kontrat cekildi!');
-    showToast('ETH cekme tamamlandi!');
-    updateAdminStats();
-  } catch(e) { setSts('admin-sts','err','Hata: '+(e.reason||e.message||'').slice(0,60)); }
+  }
+  var resultMsg = '';
+  if (success.length) resultMsg += success.join(', ') + ' cekildi. ';
+  if (skipped.length) resultMsg += skipped.join(', ') + ' bakiye yok. ';
+  if (failed.length)  resultMsg += 'HATA → ' + failed.join(' | ');
+  if (success.length > 0 && failed.length === 0) {
+    setSts('admin-sts','ok', resultMsg.trim());
+    showToast(success.length + ' kontrat basariyla cekildi!');
+  } else if (success.length === 0 && failed.length === 0) {
+    setSts('admin-sts','ok', 'Tum kasalar zaten bos.');
+  } else if (failed.length > 0) {
+    setSts('admin-sts','err', resultMsg.trim());
+  } else {
+    setSts('admin-sts','ok', resultMsg.trim());
+  }
+  updateAdminStats();
 }
 
 async function updateAllStats() {
@@ -582,10 +610,31 @@ async function updateAllStats() {
     document.getElementById('ck-total').textContent  = totalXP.toLocaleString('tr-TR');
     document.getElementById('xp-level-global').textContent = getLevel(totalXP);
     var lastTime = Number(cRes[2]);
-    var now = new Date(), reset = new Date(); reset.setHours(3,0,0,0);
-    if (now < reset) reset.setDate(reset.getDate()-1);
-    var canCk = (lastTime*1000) < reset.getTime();
-    document.getElementById('ck-status').textContent = canCk ? 'Bekliyor' : 'Yapildi';
+    var nowTs = Math.floor(Date.now() / 1000); // şu anki UTC unix timestamp
+
+    // Kontrat UTC gece yarısı (00:00 UTC) reset kullanıyorsa:
+    var nowDate   = new Date();
+    var utcMidnight = Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), nowDate.getUTCDate(), 0, 0, 0);
+    var canCkUtc  = (lastTime * 1000) < utcMidnight;
+
+    // Kontrat 24 saat geçince reset kullanıyorsa (fallback):
+    var canCk24h  = (nowTs - lastTime) >= 82800; // 23 saat = 82800 saniye (1 saat buffer)
+
+    // İlk kez check-in (lastTime == 0) her zaman izin ver
+    var canCk = (lastTime === 0) || canCkUtc || canCk24h;
+
+    // Kalan süreyi hesapla (24h bazlı)
+    var nextTs = lastTime + 86400;
+    var diffSec = nextTs - nowTs;
+    var statusTxt;
+    if (canCk) {
+      statusTxt = 'Hazir';
+    } else {
+      var hh = Math.floor(diffSec / 3600);
+      var mm = Math.floor((diffSec % 3600) / 60);
+      statusTxt = hh + 's ' + mm + 'dk sonra';
+    }
+    document.getElementById('ck-status').textContent = statusTxt;
     document.getElementById('ck-btn').disabled = !canCk;
   } catch(e) {}
 }
