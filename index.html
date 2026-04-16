@@ -601,36 +601,44 @@ async function updateAllStats() {
     var totalXP   = checkInXP + Number(wS[0]||0n) + Number(dS[0]||0n);
     document.getElementById('ck-streak').textContent = cRes[0].toString();
     document.getElementById('ck-total').textContent  = totalXP.toLocaleString('tr-TR');
-    document.getElementById('xp-level-global').textContent = getLevel(totalXP);
+    document.getElementById('xp-level-global').innerHTML = getLevel(totalXP);
 
     // ─── CHECK-IN ZAMAN KONTROLU ─────────────────────────────────────────────
     // Kural: her gece UTC 00:00'da (= Turkiye 03:00) sifirlanir
     // lastCheckIn kontratta Unix timestamp olarak saklanir
     var lastTime = Number(cRes[2]); // Unix timestamp (saniye)
-
-    // Su an UTC gun baslangici (bugunun 00:00:00 UTC'si)
-    var nowDate = new Date();
-    var todayUtcMidnight = Date.UTC(
-      nowDate.getUTCFullYear(),
-      nowDate.getUTCMonth(),
-      nowDate.getUTCDate(),
-      0, 0, 0, 0
-    ) / 1000; // saniyeye cevir
-
-    // Hic check-in yapilmamis (lastTime=0) VEYA son check-in bugunun UTC baslangicından once
-    var canCk = (lastTime === 0) || (lastTime < todayUtcMidnight);
-
-    // Kalan sureyi hesapla: bir sonraki UTC gece yarisi
     var nowTs = Math.floor(Date.now() / 1000);
-    var nextMidnightTs = todayUtcMidnight + 86400; // yarin 00:00 UTC
-    var diffSec = nextMidnightTs - nowTs;
+
+    // Turkiye gece yarisi = 00:00 TR = 21:00 UTC (UTC+3)
+    // Simdi hangi TR gunundeyiz?
+    var TR_OFFSET = 3 * 3600; // 3 saat = 10800 saniye
+    var nowTrTs = nowTs + TR_OFFSET; // TR saatindeki timestamp
+    var trDayStart = nowTrTs - (nowTrTs % 86400); // bugunun 00:00 TR'si (UTC cinsinden: trDayStart - TR_OFFSET)
+    var todayTrMidnightUtc = trDayStart + 86400 - TR_OFFSET; // bugunun 00:00 TR = 21:00 UTC
+
+    // Eger 21:00 UTC'yi gectik → bugunun reset'i gerceklesti
+    // Gecmedik → dunkunu kullan
+    var lastResetUtc, nextResetUtc;
+    if (nowTs >= todayTrMidnightUtc) {
+      lastResetUtc = todayTrMidnightUtc;
+      nextResetUtc = todayTrMidnightUtc + 86400;
+    } else {
+      lastResetUtc = todayTrMidnightUtc - 86400;
+      nextResetUtc = todayTrMidnightUtc;
+    }
+
+    // Check-in yapilabilir mi?
+    var canCk = (lastTime === 0) || (lastTime < lastResetUtc);
+
+    // Kalan sure
+    var diffSec = nextResetUtc - nowTs;
     var statusTxt;
     if (canCk) {
-      statusTxt = 'Hazir ✓';
+      statusTxt = 'Hazir!';
     } else {
       var hh = Math.floor(diffSec / 3600);
       var mm = Math.floor((diffSec % 3600) / 60);
-      statusTxt = hh+'s '+mm+'dk sonra';
+      statusTxt = hh + 's ' + mm + 'dk sonra (00:00 TR)';
     }
     document.getElementById('ck-status').textContent = statusTxt;
     document.getElementById('ck-btn').disabled = !canCk;
