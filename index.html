@@ -557,7 +557,8 @@ async function withdrawAll() {
       var bal = await prov.getBalance(item.a);
       if (bal === 0n) { skipped.push(item.name); continue; }
       setSts('admin-sts','pnd',item.name+' cekiliyor... ('+(i+1)+'/5)');
-      var tx = await item.c.withdraw();
+      // gasLimit manuel verilince ethers.js otomatik estimateGas CALLISTIRMAZ
+      var tx = await item.c.withdraw({ gasLimit: 100000n });
       await tx.wait();
       success.push(item.name);
     } catch(e) {
