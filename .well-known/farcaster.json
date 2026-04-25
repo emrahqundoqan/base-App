@@ -7,12 +7,24 @@
   "frame": {
     "version": "next",
     "name": "Base Fun",
+    "subtitle": "Onchain Games & Rewards",
+    "description": "Base zincirinde gunluk check-in yap, GM/GN gonder, zar at ve sanli carki cevir. XP kazan, seviye atla!",
     "iconUrl": "https://basefun-app.vercel.app/icon-192.png",
     "homeUrl": "https://basefun-app.vercel.app",
     "imageUrl": "https://basefun-app.vercel.app/og.png",
-    "buttonTitle": "🎮 Oyna",
+    "heroImageUrl": "https://basefun-app.vercel.app/og.png",
     "splashImageUrl": "https://basefun-app.vercel.app/splash.png",
     "splashBackgroundColor": "#0052FF",
-    "webhookUrl": "https://basefun-app.vercel.app/api/webhook"
+    "screenshotUrls": [
+      "https://basefun-app.vercel.app/splash.png"
+    ],
+    "buttonTitle": "Oyna",
+    "webhookUrl": "https://basefun-app.vercel.app/api/webhook",
+    "primaryCategory": "games",
+    "tags": ["games", "base", "checkin", "rewards", "xp"],
+    "tagline": "Oyna, Kazan, Seviye Atla!",
+    "ogTitle": "Base Fun - Onchain Games & Rewards",
+    "ogDescription": "Base zincirinde gunluk check-in, GM/GN, zar oyunu ve sanli cark. XP kazan, seviye atla!",
+    "ogImageUrl": "https://basefun-app.vercel.app/og.png"
   }
 }
