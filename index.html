@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Base Fun dApp</title>
 <meta name="description" content="Base zincirinde günlük check-in, GM/GN, zar oyunu ve şanslı çark. XP kazan, seviye atla!"/>
-
-<!-- Open Graph -->
 <meta property="og:title" content="Base Fun - Onchain Games and Rewards"/>
 <meta name="og:title" content="Base Fun - Onchain Games and Rewards"/>
 <meta property="og:description" content="Daily check-in, GM/GN, dice game and lucky wheel on Base. Earn XP, level up!"/>
@@ -17,57 +15,44 @@
 <meta property="og:locale" content="tr_TR"/>
 <meta property="og:url" content="https://basefun-app.vercel.app"/>
 <meta property="og:type" content="website"/>
-
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Base Fun dApp"/>
 <meta name="twitter:description" content="Base zincirinde günlük check-in, XP kazan, seviye atla!"/>
 <meta name="twitter:image" content="https://basefun-app.vercel.app/og.png"/>
-
-<!-- Farcaster Frame v2 / Mini App -->
 <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://basefun-app.vercel.app/og.png","button":{"title":"Oyna","action":{"type":"launch_frame","name":"Base Fun","url":"https://basefun-app.vercel.app","splashImageUrl":"https://basefun-app.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}'/>
 <meta name="fc:frame" content='{"version":"next","imageUrl":"https://basefun-app.vercel.app/og.png","button":{"title":"Oyna","action":{"type":"launch_frame","name":"Base Fun","url":"https://basefun-app.vercel.app","splashImageUrl":"https://basefun-app.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}'/>
-
-<!-- PWA -->
-<meta name="base:app_id" content="69ec76d08502c283edbf9477" />
+<meta name="base:app_id" content="69ec76d08502c283edbf9477"/>
 <meta name="theme-color" content="#0052FF"/>
 <link rel="manifest" href="/manifest.json"/>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.0.28/dist/index.umd.min.js"></script>
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
-
 :root{
-  --blue:#0052FF; --blue-dark:#003dbf; --blue-light:#e6eeff;
-  --gold:#F59E0B; --purple:#7C3AED;
-  --green:#10B981; --green-light:#D1FAE5;
-  --red:#EF4444; --red-light:#FEE2E2;
-  --warn:#F59E0B; --warn-light:#FEF9C3;
-  --bg:#fff; --bg2:#f8f8f7; --bg3:#f0f0ee;
-  --bdr:rgba(0,0,0,.10); --tx:#1a1a18; --tx2:#6b6b67;
-  --r:12px; --rs:8px; --shadow:0 2px 8px rgba(0,82,255,.08);
+  --blue:#0052FF;--blue-dark:#003dbf;--blue-light:#e6eeff;
+  --gold:#F59E0B;--purple:#7C3AED;
+  --green:#10B981;--green-light:#D1FAE5;
+  --red:#EF4444;--red-light:#FEE2E2;
+  --warn:#F59E0B;--warn-light:#FEF9C3;
+  --bg:#fff;--bg2:#f8f8f7;--bg3:#f0f0ee;
+  --bdr:rgba(0,0,0,.10);--tx:#1a1a18;--tx2:#6b6b67;
+  --r:12px;--rs:8px;--shadow:0 2px 8px rgba(0,82,255,.08);
 }
 @media(prefers-color-scheme:dark){
   :root{
-    --bg:#141413; --bg2:#1e1e1b; --bg3:#252521;
-    --bdr:rgba(255,255,255,.10); --tx:#f0efea; --tx2:#9c9a92;
-    --blue-light:#0c1a3d; --green-light:#042f1e;
-    --red-light:#2d0a0a; --warn-light:#2d1f00;
+    --bg:#141413;--bg2:#1e1e1b;--bg3:#252521;
+    --bdr:rgba(255,255,255,.10);--tx:#f0efea;--tx2:#9c9a92;
+    --blue-light:#0c1a3d;--green-light:#042f1e;
+    --red-light:#2d0a0a;--warn-light:#2d1f00;
     --shadow:0 2px 8px rgba(0,0,0,.25);
   }
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-tap-highlight-color:transparent}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;min-height:100dvh}
 .wrap{max-width:520px;margin:0 auto;padding:20px 16px 72px}
-@supports(padding-bottom:env(safe-area-inset-bottom)){
-  .wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
-}
+@supports(padding-bottom:env(safe-area-inset-bottom)){.wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom))}}
 
-/* HEADER */
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:.5px solid var(--bdr)}
 .logo{width:42px;height:42px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 4px rgba(0,82,255,.12)}
 .hdr-txt h1{font-family:'Space Mono',monospace;font-size:16px;font-weight:700}
@@ -75,16 +60,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .net-pill{margin-left:auto;display:flex;align-items:center;gap:5px;background:var(--blue-light);color:var(--blue);font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;border:.5px solid rgba(0,82,255,.25);white-space:nowrap}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--tx2);flex-shrink:0;animation:blink 2s infinite}
 .dot.green{background:var(--green);box-shadow:0 0 0 2px rgba(16,185,129,.25);animation:none}
-.dot.red{background:var(--red);box-shadow:0 0 0 2px rgba(239,68,68,.25);animation:none}
+.dot.red{background:var(--red);animation:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* NETWORK WARN */
 .nwrn{background:var(--warn-light);border:.5px solid #fcd34d;border-radius:var(--rs);padding:11px 14px;font-size:13px;color:#92400E;margin-bottom:14px;align-items:center;gap:8px;display:none}
 .nwrn.on{display:flex}
 @media(prefers-color-scheme:dark){.nwrn,.nwrn.on{color:#fcd34d}}
-.nwrn button{margin-left:auto;background:var(--warn);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;flex-shrink:0}
+.nwrn button{margin-left:auto;background:var(--warn);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
 
-/* WALLET CARD */
 .wlt-card{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
 .wlt-info{flex:1;min-width:0}
 .wlt-info .lbl{font-size:11px;color:var(--tx2);font-weight:500}
@@ -93,7 +76,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .btn-con:active{transform:scale(.97)}
 .btn-con.off{background:var(--bg3);color:var(--tx2);border:.5px solid var(--bdr)}
 
-/* TABS */
 .tabs{display:flex;gap:2px;background:var(--bg2);border:.5px solid var(--bdr);border-radius:10px;padding:4px;margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;min-width:60px;padding:8px 6px;border:none;background:transparent;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:var(--tx2);white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all .18s}
@@ -101,10 +83,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .tab-admin{display:none}
 .tab-admin.show{display:block;color:var(--red);font-weight:700}
 
-/* PANES */
 .pane{display:none}.pane.on{display:block}
 
-/* CARD */
 .card{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
 .ctitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);margin-bottom:14px}
 .irow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:.5px solid var(--bdr);font-size:13px}
@@ -112,20 +92,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .irow .il{color:var(--tx2)}
 .irow .iv{font-weight:600;font-family:'Space Mono',monospace;font-size:12px}
 
-/* STATS */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .sc{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--r);padding:18px 16px;text-align:center;box-shadow:var(--shadow)}
 .sn{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;line-height:1}
 .sl{font-size:12px;color:var(--tx2);margin-top:6px;font-weight:500}
 
-/* BUTTONS */
 .abtn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;transition:all .15s}
 .abtn:active{transform:scale(.98)}
 .abtn-dp{background:var(--blue);color:#fff}
 .abtn-dp:hover:not(:disabled){background:var(--blue-dark)}
 .abtn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
-/* STATUS */
 .sts{margin-top:14px;padding:12px 14px;border-radius:var(--rs);font-size:13px;display:none;align-items:flex-start;gap:9px;word-break:break-word}
 .sts.on{display:flex}
 .sts.pnd{background:var(--warn-light);color:#92400E;border:.5px solid #fcd34d}
@@ -135,14 +112,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin_anim .65s linear infinite;flex-shrink:0}
 @keyframes spin_anim{to{transform:rotate(360deg)}}
 
-/* FBOX */
 .fbox{display:flex;justify-content:space-between;align-items:center;border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px}
 .fbox-dp{background:var(--blue-light);border:.5px solid rgba(0,82,255,.25)}
 
-/* GM/GN */
 .gm-gn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .gm-card{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
 .gm-icon{font-size:40px;text-align:center;margin-bottom:12px}
+
+/* GAMES SUB-TABS */
+.sub-tabs{display:flex;gap:6px;margin-bottom:16px}
+.sub-tab{flex:1;padding:10px 6px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:'DM Sans',sans-serif;transition:all .18s;text-align:center}
+.sub-tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+.sub-pane{display:none}.sub-pane.on{display:block}
 
 /* DICE */
 .dice-masa{background:linear-gradient(145deg,#1a7a42,#0d4a28);border-radius:16px;border:6px solid #8B6914;padding:32px 20px;margin-bottom:14px;display:flex;justify-content:center;gap:40px;min-height:150px;align-items:center}
@@ -154,6 +136,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:24px;z-index:10}
 #wheel-cv{border-radius:50%;box-shadow:0 4px 24px rgba(0,0,0,.2)}
 .wheel-res{font-weight:700;font-size:18px;min-height:28px;margin-bottom:10px;font-family:'Space Mono',monospace;text-align:center}
+
+/* PAC-MAN */
+.pm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.pm-stat{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+.pm-label{font-size:10px;color:var(--tx2);margin-bottom:2px}
+#pm-canvas{display:block;margin:0 auto;border-radius:8px;border:2px solid var(--bdr);background:#000;max-width:100%}
+.pm-dpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;max-width:180px;margin-left:auto;margin-right:auto}
+.pm-dpad button{padding:16px 0;border:none;border-radius:10px;background:var(--bg2);border:.5px solid var(--bdr);font-size:22px;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;user-select:none}
+.pm-dpad button:active{background:var(--blue);color:#fff;transform:scale(.92)}
+.pm-dpad .empty{background:transparent;border:none;pointer-events:none}
+.pm-overlay{position:relative}
+#pm-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);color:#fff;padding:16px 24px;border-radius:12px;text-align:center;font-family:'Space Mono',monospace;font-size:14px;line-height:1.6;display:none;z-index:10;white-space:nowrap}
+#pm-msg.on{display:block}
+.pm-lives{display:flex;gap:4px;align-items:center}
 
 /* MODAL */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:16px}
@@ -172,10 +168,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .mdl-cls{width:100%;margin-top:12px;padding:12px;background:var(--bg2);border:.5px solid var(--bdr);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;color:var(--tx2);font-family:'DM Sans',sans-serif;transition:all .15s}
 .mdl-cls:hover{background:var(--bg3);color:var(--tx)}
 
-/* LVL */
 .lvl-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700;background:var(--blue-light);color:var(--blue)}
 
-/* TOAST */
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:99999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -183,7 +177,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 <body>
 <div class="wrap">
 
-  <!-- HEADER -->
   <div class="hdr">
     <div class="logo">
       <svg viewBox="0 0 32 32" fill="none" width="24" height="24">
@@ -193,7 +186,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
     <div class="hdr-txt">
       <h1>Base Fun dApp</h1>
-      <p>Check-in &#8226; GM/GN &#8226; Oyunlar</p>
+      <p>Check-in &#8226; GM/GN &#8226; Games</p>
     </div>
     <div class="net-pill">
       <div class="dot" id="net-dot"></div>
@@ -201,13 +194,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
-  <!-- NETWORK WARNING -->
   <div class="nwrn" id="net-warn">
     &#9888; Lutfen Base Mainnet'e gecin.
     <button onclick="switchToBase()">Agi Degistir</button>
   </div>
 
-  <!-- WALLET CARD -->
   <div class="wlt-card">
     <div class="wlt-info">
       <div class="lbl">Cuzdan</div>
@@ -216,41 +207,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <button class="btn-con" id="con-btn" onclick="handleWalletAction()">Baglan</button>
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
     <button class="tab on" id="tab-checkin" onclick="switchTab('checkin')">&#128197; Check-in</button>
     <button class="tab" id="tab-gm" onclick="switchTab('gm')">&#9728; GM/GN</button>
-    <button class="tab" id="tab-game" onclick="switchTab('game')">&#127922; Oyun</button>
-    <button class="tab" id="tab-wheel" onclick="switchTab('wheel')">&#127905; Cark</button>
+    <button class="tab" id="tab-games" onclick="switchTab('games')">&#127918; Games</button>
     <button class="tab tab-admin" id="tab-admin" onclick="switchTab('admin')">&#128273; Admin</button>
   </div>
 
   <!-- PANE: CHECK-IN -->
   <div class="pane on" id="pane-checkin">
     <div class="g2">
-      <div class="sc">
-        <div class="sn" style="color:var(--blue)" id="ck-streak">0</div>
-        <div class="sl">&#128293; Gunluk Seri</div>
-      </div>
-      <div class="sc">
-        <div class="sn" style="color:var(--green)" id="ck-total">0</div>
-        <div class="sl">&#9889; Toplam XP</div>
-      </div>
+      <div class="sc"><div class="sn" style="color:var(--blue)" id="ck-streak">0</div><div class="sl">&#128293; Gunluk Seri</div></div>
+      <div class="sc"><div class="sn" style="color:var(--green)" id="ck-total">0</div><div class="sl">&#9889; Toplam XP</div></div>
     </div>
     <div class="card">
       <div class="ctitle">Profil &amp; XP Bilgisi</div>
-      <div class="irow">
-        <span class="il">Seviye</span>
-        <span id="xp-level-global" class="iv lvl-badge">&#129355; Bronz</span>
-      </div>
-      <div class="irow">
-        <span class="il">Gunluk Sifirlanma</span>
-        <span class="iv">00:00 UTC (03:00 TR)</span>
-      </div>
-      <div class="irow" style="border-bottom:none">
-        <span class="il">Durum</span>
-        <span id="ck-status" class="iv">Cuzdan bekleniyor</span>
-      </div>
+      <div class="irow"><span class="il">Seviye</span><span id="xp-level-global" class="iv lvl-badge">&#129355; Bronz</span></div>
+      <div class="irow"><span class="il">Gunluk Sifirlanma</span><span class="iv">00:00 TR</span></div>
+      <div class="irow" style="border-bottom:none"><span class="il">Durum</span><span id="ck-status" class="iv">Cuzdan bekleniyor</span></div>
       <div class="fbox fbox-dp" style="margin-top:14px">
         <span style="color:var(--tx2)">Ucret</span>
         <span style="font-weight:700;font-family:'Space Mono',monospace">0.00001 ETH</span>
@@ -290,39 +264,91 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
-  <!-- PANE: GAME -->
-  <div class="pane" id="pane-game">
-    <div class="card">
-      <div class="ctitle">&#127922; Zar Oyunu</div>
-      <div class="fbox fbox-dp">
-        <span style="color:var(--tx2)">Her atis ucreti</span>
-        <span style="font-weight:700;font-family:'Space Mono',monospace">0.00005 ETH</span>
-      </div>
-      <div class="dice-masa">
-        <div class="dice-box" id="d1-box"><svg id="d1-svg" width="60" height="60"></svg></div>
-        <div class="dice-box" id="d2-box"><svg id="d2-svg" width="60" height="60"></svg></div>
-      </div>
-      <div class="dice-res" id="dice-res"></div>
-      <button class="abtn abtn-dp" onclick="rollDice()">&#127922; Zar At!</button>
-      <div class="sts" id="roll-sts"></div>
+  <!-- PANE: GAMES -->
+  <div class="pane" id="pane-games">
+    <div class="sub-tabs">
+      <button class="sub-tab on" id="stab-pacman" onclick="switchSubTab('pacman')">&#127919; Pic-Man</button>
+      <button class="sub-tab" id="stab-dice" onclick="switchSubTab('dice')">&#127922; Zar</button>
+      <button class="sub-tab" id="stab-wheel" onclick="switchSubTab('wheel')">&#127905; Cark</button>
     </div>
-  </div>
 
-  <!-- PANE: WHEEL -->
-  <div class="pane" id="pane-wheel">
-    <div class="card" style="text-align:center">
-      <div class="ctitle">&#127905; Sanli Cark</div>
-      <div class="fbox fbox-dp" style="text-align:left">
-        <span style="color:var(--tx2)">Her cevirme ucreti</span>
-        <span style="font-weight:700;font-family:'Space Mono',monospace">0.00005 ETH</span>
+    <!-- SUB: PAC-MAN -->
+    <div class="sub-pane on" id="spane-pacman">
+      <div class="card">
+        <div class="pm-header">
+          <div>
+            <div class="pm-label">SKOR</div>
+            <div class="pm-stat" id="pm-score">0</div>
+          </div>
+          <div>
+            <div class="pm-label">SEVIYE</div>
+            <div class="pm-stat" id="pm-level">1 / 21</div>
+          </div>
+          <div>
+            <div class="pm-label">CAN</div>
+            <div class="pm-stat pm-lives" id="pm-lives">&#128993;&#128993;&#128993;</div>
+          </div>
+          <div>
+            <div class="pm-label">XP</div>
+            <div class="pm-stat" id="pm-xp-earned" style="color:var(--green)">0</div>
+          </div>
+        </div>
+        <div class="pm-overlay">
+          <canvas id="pm-canvas" width="280" height="280"></canvas>
+          <div id="pm-msg"></div>
+        </div>
+        <div class="pm-dpad">
+          <div class="empty"></div>
+          <button ontouchstart="pmDir(0,-1)" onmousedown="pmDir(0,-1)">&#8593;</button>
+          <div class="empty"></div>
+          <button ontouchstart="pmDir(-1,0)" onmousedown="pmDir(-1,0)">&#8592;</button>
+          <button ontouchstart="pmStartOrRestart()" onmousedown="pmStartOrRestart()" style="font-size:14px;font-weight:700">&#9654;</button>
+          <button ontouchstart="pmDir(1,0)" onmousedown="pmDir(1,0)">&#8594;</button>
+          <div class="empty"></div>
+          <button ontouchstart="pmDir(0,1)" onmousedown="pmDir(0,1)">&#8595;</button>
+          <div class="empty"></div>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);text-align:center;margin-top:10px">
+          Tum yiyecekleri topla! Her seviye +XP kazan.
+        </div>
+        <div class="sts" id="pm-sts"></div>
       </div>
-      <div class="wheel-wrapper">
-        <div class="wheel-pointer">&#9660;</div>
-        <canvas id="wheel-cv" width="280" height="280"></canvas>
+    </div>
+
+    <!-- SUB: DICE -->
+    <div class="sub-pane" id="spane-dice">
+      <div class="card">
+        <div class="ctitle">&#127922; Zar Oyunu</div>
+        <div class="fbox fbox-dp">
+          <span style="color:var(--tx2)">Her atis ucreti</span>
+          <span style="font-weight:700;font-family:'Space Mono',monospace">0.00005 ETH</span>
+        </div>
+        <div class="dice-masa">
+          <div class="dice-box" id="d1-box"><svg id="d1-svg" width="60" height="60"></svg></div>
+          <div class="dice-box" id="d2-box"><svg id="d2-svg" width="60" height="60"></svg></div>
+        </div>
+        <div class="dice-res" id="dice-res"></div>
+        <button class="abtn abtn-dp" onclick="rollDice()">&#127922; Zar At!</button>
+        <div class="sts" id="roll-sts"></div>
       </div>
-      <div class="wheel-res" id="wheel-res"></div>
-      <button class="abtn abtn-dp" id="spin-btn" onclick="spinWheel()">&#127905; Carki Cevir!</button>
-      <div class="sts" id="wheel-sts"></div>
+    </div>
+
+    <!-- SUB: WHEEL -->
+    <div class="sub-pane" id="spane-wheel">
+      <div class="card" style="text-align:center">
+        <div class="ctitle">&#127905; Sanli Cark</div>
+        <div class="fbox fbox-dp" style="text-align:left">
+          <span style="color:var(--tx2)">Her cevirme ucreti</span>
+          <span style="font-weight:700;font-family:'Space Mono',monospace">0.00005 ETH</span>
+        </div>
+        <div class="wheel-wrapper">
+          <div class="wheel-pointer">&#9660;</div>
+          <canvas id="wheel-cv" width="280" height="280"></canvas>
+        </div>
+        <div class="wheel-res" id="wheel-res"></div>
+        <button class="abtn abtn-dp" id="spin-btn" onclick="spinWheel()">&#127905; Carki Cevir!</button>
+        <div class="sts" id="wheel-sts"></div>
+      </div>
     </div>
   </div>
 
@@ -348,462 +374,720 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
-</div><!-- /wrap -->
+</div>
 
-<!-- WALLET MODAL -->
 <div class="mbg" id="modal-bg" onclick="handleModalBgClick(event)">
   <div class="mdl">
     <h2>Cuzdan Secin</h2>
     <div class="mdl-sub">Base Mainnet'e baglanmak icin bir cuzdan secin</div>
-    <div id="wlt-list"><div style="text-align:center;color:var(--tx2);padding:20px 0;font-size:13px">Cuzdan aranıyor...</div></div>
+    <div id="wlt-list"><div style="text-align:center;color:var(--tx2);padding:20px 0;font-size:13px">Aranıyor...</div></div>
     <button class="mdl-cls" onclick="closeModal()">Kapat</button>
   </div>
 </div>
-
 <div id="toast"></div>
 
 <script>
-// ─── SABİT DEĞERLER ─────────────────────────────────────────────────────────
-var ADMIN_ADDRESS = '0xca37E522b57FEebc6f371EA500ecBf1e408FfD2c';
-var ADDR = {
-  CHECKIN: '0xb4e5E1C7D4b0e846645F49995024D570A0A6218c',
-  GM:      '0xfDeb4a6C1f8a96D1817e29916047dEa53e70111E',
-  GN:      '0x5A4F2A0C1134efBCe9a4Debc7B000007Cdb637B9',
-  WHEEL:   '0x39b91858e45C33Bd6407c27449fdC773EE288cdC',
-  DICE:    '0xB1c153F5b8eB0AB275c4ed721606D814750EFea9'
-};
-var SEGMENTS_XP = [10,25,50,5,30,10,55,100,15,20,35,40,60,65,70,75];
-var COLORS = ["#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316"];
-var ABIS = {
-  CK:    ["function checkIn() payable","function userStreaks(address) view returns (uint256)","function totalUserCheckIns(address) view returns (uint256)","function lastCheckIn(address) view returns (uint256)","function withdraw() external"],
-  MSG:   ["function gm(string) payable","function gn(string) payable","function withdraw() external"],
-  WHEEL: ["function spin() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event WheelSpun(address indexed player, uint8 segment, uint256 xpEarned, uint256 totalXP)"],
-  DICE:  ["function rollDice() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event DiceRolled(address indexed player, uint8 d1, uint8 d2, bool isD, uint256 xp, uint256 txp)"]
+// ─── SABITLER ────────────────────────────────────────────────────────────────
+var ADMIN_ADDRESS='0xca37E522b57FEebc6f371EA500ecBf1e408FfD2c';
+var ADDR={CHECKIN:'0xb4e5E1C7D4b0e846645F49995024D570A0A6218c',GM:'0xfDeb4a6C1f8a96D1817e29916047dEa53e70111E',GN:'0x5A4F2A0C1134efBCe9a4Debc7B000007Cdb637B9',WHEEL:'0x39b91858e45C33Bd6407c27449fdC773EE288cdC',DICE:'0xB1c153F5b8eB0AB275c4ed721606D814750EFea9'};
+var SEGMENTS_XP=[10,25,50,5,30,10,55,100,15,20,35,40,60,65,70,75];
+var COLORS=["#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316"];
+var ABIS={
+  CK:["function checkIn() payable","function userStreaks(address) view returns (uint256)","function totalUserCheckIns(address) view returns (uint256)","function lastCheckIn(address) view returns (uint256)","function withdraw() external"],
+  MSG:["function gm(string) payable","function gn(string) payable","function withdraw() external"],
+  WHEEL:["function spin() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event WheelSpun(address indexed player, uint8 segment, uint256 xpEarned, uint256 totalXP)"],
+  DICE:["function rollDice() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event DiceRolled(address indexed player, uint8 d1, uint8 d2, bool isD, uint256 xp, uint256 txp)"]
 };
 
-// ─── GLOBAL ─────────────────────────────────────────────────────────────────
-var acct=null, prov=null, sgn=null, rawProv=null;
-var wheelAngle=0, wlts={}, toastTimer=null, isFrameEnv=false;
+// ─── GLOBAL ──────────────────────────────────────────────────────────────────
+var acct=null,prov=null,sgn=null,rawProv=null;
+var wheelAngle=0,wlts={},toastTimer=null,isFrameEnv=false;
+
+// ─── PAC-MAN OYUNU ───────────────────────────────────────────────────────────
+// Grid-snap sistemi: Pac-Man her zaman grid merkezinde hareket eder.
+// Her adimda bir sonraki hucreye gecilip gecilmeyecegi kontrol edilir.
+// Bu yontem duvar hassasiyetini maksimize eder.
+var PM={
+  CELL:14, COLS:20, ROWS:20,
+  running:false, animId:null,
+  level:1, score:0, lives:3, xpEarned:0,
+  dx:0, dy:0,        // mevcut yon (grid)
+  ndx:0, ndy:0,      // istenen yeni yon
+  col:0, row:0,      // grid pozisyonu (tam sayi)
+  // Smooth animasyon icin pixel offset (0..CELL arasi)
+  offX:0, offY:0,
+  pellets:[],
+  ghosts:[],
+  map:[],
+  totalPellets:0,
+  eaten:0,
+  gameOver:false,
+  started:false,
+  lastTime:0,
+  stepMs:0,          // bir hucreyi gecme suresi (ms)
+  stepAcc:0,         // birikmis sure
+  ghostStepMs:0
+};
+
+// 20x20 maze template (1=wall, 0=pellet, 2=empty, 3=power)
+var MAZE_TMPL=[
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+  [1,3,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,3,1],
+  [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1],
+  [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
+  [1,1,1,1,0,1,1,1,2,1,1,2,1,1,1,0,1,1,1,1],
+  [1,1,1,1,0,1,2,2,2,2,2,2,2,2,1,0,1,1,1,1],
+  [1,1,1,1,0,1,2,1,1,2,2,1,1,2,1,0,1,1,1,1],
+  [2,2,2,2,0,2,2,1,2,2,2,2,1,2,2,0,2,2,2,2],
+  [1,1,1,1,0,1,2,1,1,1,1,1,1,2,1,0,1,1,1,1],
+  [1,1,1,1,0,1,2,2,2,2,2,2,2,2,1,0,1,1,1,1],
+  [1,1,1,1,0,1,2,1,1,1,1,1,1,2,1,0,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+  [1,3,0,1,0,0,0,0,0,2,2,0,0,0,0,0,1,0,3,1],
+  [1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0,1,1],
+  [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+function pmGetCanvas(){ return document.getElementById('pm-canvas'); }
+function pmGetCtx(){ return pmGetCanvas().getContext('2d'); }
+
+function pmInitLevel(){
+  PM.map=[];
+  PM.pellets=[];
+  PM.totalPellets=0;
+  PM.eaten=0;
+
+  for(var r=0;r<PM.ROWS;r++){
+    PM.map.push([]);
+    for(var c=0;c<PM.COLS;c++){
+      PM.map[r].push(MAZE_TMPL[r][c]);
+      if(MAZE_TMPL[r][c]===0||MAZE_TMPL[r][c]===3){
+        PM.pellets.push({r:r,c:c,power:MAZE_TMPL[r][c]===3,eaten:false});
+        PM.totalPellets++;
+      }
+    }
+  }
+
+  // Pac-Man baslangic - grid snap sistemi
+  PM.col=10; PM.row=16;
+  PM.offX=0; PM.offY=0;
+  PM.dx=0; PM.dy=0; PM.ndx=0; PM.ndy=0;
+
+  // Hiz: kaç ms'de bir hucre gecilir (dusuk = hizli)
+  PM.stepMs = Math.max(60, 200 - PM.level * 7);
+  PM.ghostStepMs = Math.max(80, 250 - PM.level * 8);
+  PM.stepAcc = 0;
+
+  // Hayaletler - grid bazli
+  PM.ghosts=[
+    {col:9, row:9, dx:1,dy:0, offX:0,offY:0, acc:0, color:'#FF0000',scared:false,scaredTimer:0},
+    {col:10,row:10,dx:-1,dy:0,offX:0,offY:0,acc:0, color:'#FFB8FF',scared:false,scaredTimer:0},
+    {col:10,row:9, dx:0,dy:1, offX:0,offY:0,acc:0, color:'#00FFFF',scared:false,scaredTimer:0},
+    {col:9, row:10,dx:0,dy:-1,offX:0,offY:0,acc:0, color:'#FFB852',scared:false,scaredTimer:0}
+  ];
+  PM.won=false;
+  PM.gameOver=false;
+}
+
+function pmCanMove(r,c){
+  if(r<0||r>=PM.ROWS||c<0||c>=PM.COLS) return false;
+  return PM.map[r][c]!==1;
+}
+
+function pmMoveGhost(g,dt){
+  var ms=PM.ghostStepMs*(g.scared?2:1);
+  g.acc+=dt;
+
+  // Smooth offset guncelle
+  var prog=Math.min(g.acc/ms,1);
+  g.offX=g.dx*PM.CELL*prog;
+  g.offY=g.dy*PM.CELL*prog;
+
+  if(g.acc>=ms){
+    g.acc-=ms;
+    // Bir sonraki hucreye gec
+    var nc=g.col+g.dx, nr=g.row+g.dy;
+    if(pmCanMove(nr,nc)){ g.col=nc; g.row=nr; }
+    else { g.dx*=-1; g.dy*=-1; } // Duvara carp, geri don
+
+    // Yeni hucrede yon sec
+    var dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+    dirs=dirs.filter(function(d){ return !(d[0]===-g.dx&&d[1]===-g.dy); });
+    dirs=dirs.filter(function(d){ return pmCanMove(g.row+d[1],g.col+d[0]); });
+    if(dirs.length>0){
+      var d=dirs[Math.floor(Math.random()*dirs.length)];
+      g.dx=d[0]; g.dy=d[1];
+    }
+    g.offX=0; g.offY=0;
+  }
+  if(g.scared){ g.scaredTimer-=dt; if(g.scaredTimer<=0){g.scared=false;g.scaredTimer=0;} }
+}
+
+function pmDraw(){
+  var cv=pmGetCanvas(), ctx=pmGetCtx();
+  var C=PM.CELL;
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,cv.width,cv.height);
+
+  // Duvarlar
+  ctx.fillStyle='#1a4bcc';
+  for(var r=0;r<PM.ROWS;r++){
+    for(var c=0;c<PM.COLS;c++){
+      if(PM.map[r][c]===1){
+        ctx.fillRect(c*C,r*C,C,C);
+        ctx.strokeStyle='#2255ee'; ctx.lineWidth=0.5;
+        ctx.strokeRect(c*C,r*C,C,C);
+      }
+    }
+  }
+
+  // Pelletler
+  PM.pellets.forEach(function(p){
+    if(p.eaten) return;
+    ctx.beginPath();
+    if(p.power){
+      ctx.fillStyle='#FFB852';
+      ctx.arc(p.c*C+C/2,p.r*C+C/2,4,0,Math.PI*2);
+    } else {
+      ctx.fillStyle='#ffddaa';
+      ctx.arc(p.c*C+C/2,p.r*C+C/2,2,0,Math.PI*2);
+    }
+    ctx.fill();
+  });
+
+  // Pac-Man - grid snap ile ciz
+  var pacPixX = PM.col*C + C/2 + PM.offX;
+  var pacPixY = PM.row*C + C/2 + PM.offY;
+  var mouthAngle=(PM.dx!==0||PM.dy!==0)?0.25:0.1;
+  var angle=Math.atan2(PM.dy,PM.dx);
+  ctx.beginPath();
+  ctx.moveTo(pacPixX,pacPixY);
+  ctx.arc(pacPixX,pacPixY,C/2-1,angle+mouthAngle*Math.PI,angle+(2-mouthAngle)*Math.PI);
+  ctx.closePath();
+  ctx.fillStyle='#FFE000';
+  ctx.fill();
+
+  // Hayaletler - grid snap ile ciz
+  PM.ghosts.forEach(function(g){
+    var gx=g.col*C+C/2+g.offX, gy=g.row*C+C/2+g.offY, gr=C/2-1;
+    ctx.beginPath();
+    ctx.arc(gx,gy-gr/2,gr,Math.PI,0);
+    ctx.lineTo(gx+gr,gy+gr/2);
+    var waves=3;
+    for(var i=0;i<waves;i++){
+      ctx.quadraticCurveTo(gx+gr-(i*2*gr/waves)-gr/waves,gy+gr+4,gx+gr-(i+1)*2*gr/waves,gy+gr/2);
+    }
+    ctx.lineTo(gx-gr,gy+gr/2);
+    ctx.closePath();
+    ctx.fillStyle=g.scared?(g.scaredTimer<2000?((Math.floor(Date.now()/200)%2===0)?'#fff':'#0000ff'):'#0000ff'):g.color;
+    ctx.fill();
+    // Gozler
+    if(!g.scared){
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(gx-gr/3,gy-gr/3,gr/4,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+gr/3,gy-gr/3,gr/4,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#00f';
+      ctx.beginPath(); ctx.arc(gx-gr/3+g.dx*2,gy-gr/3+g.dy*2,gr/6,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+gr/3+g.dx*2,gy-gr/3+g.dy*2,gr/6,0,Math.PI*2); ctx.fill();
+    }
+  });
+}
+
+function pmLoop(ts){
+  if(!PM.running) return;
+  var dt=Math.min(ts-PM.lastTime,50);
+  PM.lastTime=ts;
+
+  // ── PAC-MAN HAREKETİ (Grid-Snap) ──────────────────────────────────────────
+  PM.stepAcc+=dt;
+  var prog=Math.min(PM.stepAcc/PM.stepMs,1);
+
+  // Smooth offset: mevcut yonde ilerle
+  PM.offX=PM.dx*PM.CELL*prog;
+  PM.offY=PM.dy*PM.CELL*prog;
+
+  // Bir hucre tamamlandi
+  if(PM.stepAcc>=PM.stepMs){
+    PM.stepAcc-=PM.stepMs;
+
+    // Mevcut yonde ilerle (duvar yoksa)
+    if(PM.dx!==0||PM.dy!==0){
+      var nc=PM.col+PM.dx, nr=PM.row+PM.dy;
+      if(pmCanMove(nr,nc)){ PM.col=nc; PM.row=nr; }
+      else { PM.dx=0; PM.dy=0; } // Duvara carpti, dur
+    }
+
+    // Yeni yon istegi: bir sonraki hucre mevcut yon ile ayni veya ilerlenebilir mi?
+    if(PM.ndx!==0||PM.ndy!==0){
+      var nnc=PM.col+PM.ndx, nnr=PM.row+PM.ndy;
+      if(pmCanMove(nnr,nnc)){
+        PM.dx=PM.ndx; PM.dy=PM.ndy;
+      }
+    }
+
+    // Tunnel
+    if(PM.col<0) PM.col=PM.COLS-1;
+    if(PM.col>=PM.COLS) PM.col=0;
+
+    // Pellet kontrolu - tam grid uzerinde
+    PM.pellets.forEach(function(p){
+      if(!p.eaten&&p.c===PM.col&&p.r===PM.row){
+        p.eaten=true; PM.eaten++;
+        if(p.power){
+          PM.score+=50;
+          PM.ghosts.forEach(function(g){g.scared=true;g.scaredTimer=6000;g.acc=0;});
+          showToast('POWER UP!');
+        } else { PM.score+=10; }
+        document.getElementById('pm-score').textContent=PM.score;
+      }
+    });
+
+    // Seviye bitti?
+    if(PM.eaten>=PM.totalPellets){ pmLevelComplete(); return; }
+  }
+
+  // ── HAYALET HAREKETİ ──────────────────────────────────────────────────────
+  PM.ghosts.forEach(function(g){ pmMoveGhost(g,dt); });
+
+  // ── CARPISME (grid bazli, cok hassas) ────────────────────────────────────
+  for(var i=0;i<PM.ghosts.length;i++){
+    var g=PM.ghosts[i];
+    // Grid hucre eslesimi - en hassas yontem
+    if(g.col===PM.col&&g.row===PM.row){
+      if(g.scared){
+        g.scared=false; g.scaredTimer=0;
+        PM.score+=200;
+        document.getElementById('pm-score').textContent=PM.score;
+        showToast('+200 puan!');
+      } else {
+        PM.lives--;
+        pmUpdateLives();
+        if(PM.lives<=0){ pmGameOver(); return; }
+        // Can kaybi: pozisyonu sifirla
+        PM.col=10; PM.row=16;
+        PM.offX=0; PM.offY=0;
+        PM.dx=0; PM.dy=0; PM.ndx=0; PM.ndy=0;
+        PM.stepAcc=0;
+        // Hayaletleri baslangic pozisyonuna gonder
+        PM.ghosts[0].col=9;  PM.ghosts[0].row=9;  PM.ghosts[0].offX=0;PM.ghosts[0].offY=0;
+        PM.ghosts[1].col=10; PM.ghosts[1].row=10; PM.ghosts[1].offX=0;PM.ghosts[1].offY=0;
+        PM.ghosts[2].col=10; PM.ghosts[2].row=9;  PM.ghosts[2].offX=0;PM.ghosts[2].offY=0;
+        PM.ghosts[3].col=9;  PM.ghosts[3].row=10; PM.ghosts[3].offX=0;PM.ghosts[3].offY=0;
+        break;
+      }
+    }
+  }
+
+  pmDraw();
+  PM.animId=requestAnimationFrame(pmLoop);
+}
+
+function pmUpdateLives(){
+  var h='';
+  for(var i=0;i<PM.lives;i++) h+='&#128993;';
+  document.getElementById('pm-lives').innerHTML=h;
+}
+
+function pmShowMsg(txt, sub){
+  var el=document.getElementById('pm-msg');
+  el.innerHTML=txt+(sub?('<br><span style="font-size:11px;opacity:.7">'+sub+'</span>'):'');
+  el.classList.add('on');
+}
+function pmHideMsg(){ document.getElementById('pm-msg').classList.remove('on'); }
+
+function pmLevelComplete(){
+  PM.running=false;
+  cancelAnimationFrame(PM.animId);
+
+  // XP hesapla: seviye * 15 + skor/10
+  var xp=PM.level*15+Math.floor(PM.score/10);
+  PM.xpEarned+=xp;
+  document.getElementById('pm-xp-earned').textContent=PM.xpEarned;
+
+  showToast('Seviye '+PM.level+' tamamlandi! +'+xp+' XP');
+
+  if(PM.level>=21){
+    // Oyun bitti - kazandi
+    pmShowMsg('TEBRIKLER!','Tum 21 seviye tamamlandi!');
+    setSts('pm-sts','ok','Harika! Toplam '+PM.xpEarned+' XP kazandiniz!');
+    PM.gameOver=true;
+    return;
+  }
+
+  PM.level++;
+  document.getElementById('pm-level').textContent=PM.level+' / 21';
+  pmShowMsg('SEVIYE '+( PM.level-1)+' TAMAM!','+'+xp+' XP — Devam icin ▶ bas');
+}
+
+function pmGameOver(){
+  PM.running=false;
+  cancelAnimationFrame(PM.animId);
+  PM.gameOver=true;
+  pmShowMsg('OYUN BITTI','Skor: '+PM.score+' — Yeniden icin ▶ bas');
+  setSts('pm-sts','err','Oyun bitti. Kazanilan XP: '+PM.xpEarned);
+}
+
+function pmStartOrRestart(){
+  if(PM.gameOver||!PM.started){
+    // Yeniden baslat
+    PM.level=1; PM.score=0; PM.lives=3; PM.xpEarned=0;
+    PM.gameOver=false; PM.started=true;
+    document.getElementById('pm-score').textContent='0';
+    document.getElementById('pm-level').textContent='1 / 21';
+    document.getElementById('pm-xp-earned').textContent='0';
+    document.getElementById('pm-sts').className='sts';
+    pmUpdateLives();
+    pmInitLevel();
+    pmHideMsg();
+    pmDraw();
+    PM.running=true;
+    PM.lastTime=performance.now();
+    PM.animId=requestAnimationFrame(pmLoop);
+    return;
+  }
+  if(!PM.running&&PM.won===false&&!PM.gameOver){
+    // Seviye sonrasi devam
+    pmInitLevel();
+    pmHideMsg();
+    PM.running=true;
+    PM.lastTime=performance.now();
+    PM.animId=requestAnimationFrame(pmLoop);
+  }
+}
+
+function pmDir(dx,dy){
+  PM.ndx=dx; PM.ndy=dy;
+  // Oyun durakliysa basla
+  if(!PM.running&&PM.started&&!PM.gameOver){
+    pmStartOrRestart();
+  }
+}
+
+// Klavye destegi
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowUp'||e.key==='w') pmDir(0,-1);
+  else if(e.key==='ArrowDown'||e.key==='s') pmDir(0,1);
+  else if(e.key==='ArrowLeft'||e.key==='a') pmDir(-1,0);
+  else if(e.key==='ArrowRight'||e.key==='d') pmDir(1,0);
+  else if(e.key===' '||e.key==='Enter') pmStartOrRestart();
+});
 
 // ─── FARCASTER SDK ───────────────────────────────────────────────────────────
-async function initFarcasterSDK() {
-  try {
-    var frameSdk = window.sdk;
-    if (!frameSdk) return;
-    var ctx = null;
-    try { ctx = await frameSdk.context; } catch(e){}
-    if (ctx && ctx.user && ctx.user.fid) {
-      isFrameEnv = true;
-      try { await frameSdk.actions.ready(); } catch(e){}
-      if (frameSdk.wallet && frameSdk.wallet.ethProvider) {
-        await connectWith(frameSdk.wallet.ethProvider, 'farcaster');
-      }
-    } else {
-      try { await frameSdk.actions.ready(); } catch(e){}
-    }
-  } catch(e) { console.warn('[Frame]', e.message); }
+async function initFarcasterSDK(){
+  try{
+    var fs=window.sdk; if(!fs) return;
+    var ctx=null; try{ctx=await fs.context;}catch(e){}
+    if(ctx&&ctx.user&&ctx.user.fid){
+      isFrameEnv=true;
+      try{await fs.actions.ready();}catch(e){}
+      if(fs.wallet&&fs.wallet.ethProvider) await connectWith(fs.wallet.ethProvider,'farcaster');
+    } else { try{await fs.actions.ready();}catch(e){} }
+  }catch(e){console.warn('[Frame]',e.message);}
 }
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},3000);
 }
 
 // ─── WALLET ──────────────────────────────────────────────────────────────────
-window.addEventListener("eip6963:announceProvider", function(e) {
-  wlts[e.detail.info.rdns] = e.detail;
-  renderWallets();
-});
+window.addEventListener("eip6963:announceProvider",function(e){wlts[e.detail.info.rdns]=e.detail;renderWallets();});
 window.dispatchEvent(new Event("eip6963:requestProvider"));
 
-function renderWallets() {
-  var list = document.getElementById('wlt-list');
-  list.innerHTML = "";
-  Object.values(wlts).forEach(function(w) {
-    var el = document.createElement('div');
-    el.className = 'wopt';
-    el.innerHTML = '<div class="wico"><img src="'+w.info.icon+'" alt="'+w.info.name+'"/></div>'
-      +'<div><div class="wnm">'+w.info.name+'</div><div class="wrdns">'+w.info.rdns+'</div></div>';
-    el.onclick = function(){ connectWith(w.provider, w.info.rdns); };
-    list.appendChild(el);
+function renderWallets(){
+  var list=document.getElementById('wlt-list'); list.innerHTML="";
+  Object.values(wlts).forEach(function(w){
+    var el=document.createElement('div'); el.className='wopt';
+    el.innerHTML='<div class="wico"><img src="'+w.info.icon+'" alt="'+w.info.name+'"/></div><div><div class="wnm">'+w.info.name+'</div><div class="wrdns">'+w.info.rdns+'</div></div>';
+    el.onclick=function(){connectWith(w.provider,w.info.rdns);}; list.appendChild(el);
   });
-  var frameSdk = window.sdk;
-  if (frameSdk && frameSdk.wallet && frameSdk.wallet.ethProvider) {
-    var el = document.createElement('div');
-    el.className = 'wopt';
-    el.innerHTML = '<div class="wico"><span>&#128994;</span></div><div><div class="wnm">Farcaster Wallet</div></div>';
-    el.onclick = function(){ connectWith(frameSdk.wallet.ethProvider, 'farcaster'); };
-    list.appendChild(el);
+  var fs=window.sdk;
+  if(fs&&fs.wallet&&fs.wallet.ethProvider){
+    var el=document.createElement('div');el.className='wopt';
+    el.innerHTML='<div class="wico"><span>&#128994;</span></div><div><div class="wnm">Farcaster Wallet</div></div>';
+    el.onclick=function(){connectWith(fs.wallet.ethProvider,'farcaster');}; list.appendChild(el);
   }
-  if (window.ethereum && Object.keys(wlts).length === 0) {
-    var el2 = document.createElement('div');
-    el2.className = 'wopt';
-    el2.innerHTML = '<div class="wico"><span>&#129418;</span></div><div><div class="wnm">Tarayici Cuzdani</div></div>';
-    el2.onclick = function(){ connectWith(window.ethereum, 'browser'); };
-    list.appendChild(el2);
+  if(window.ethereum&&Object.keys(wlts).length===0){
+    var el2=document.createElement('div');el2.className='wopt';
+    el2.innerHTML='<div class="wico"><span>&#129418;</span></div><div><div class="wnm">Tarayici Cuzdani</div></div>';
+    el2.onclick=function(){connectWith(window.ethereum,'browser');}; list.appendChild(el2);
   }
-  if (list.children.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--tx2)">Cuzdan bulunamadi.<br><br>'
-      +'<a href="https://metamask.io" target="_blank" style="color:var(--blue)">MetaMask</a> veya '
-      +'<a href="https://www.coinbase.com/wallet" target="_blank" style="color:var(--blue)">Coinbase Wallet</a> yukleyin.</div>';
-  }
+  if(list.children.length===0) list.innerHTML='<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--tx2)">Cuzdan bulunamadi.<br><a href="https://metamask.io" target="_blank" style="color:var(--blue)">MetaMask</a> veya <a href="https://www.coinbase.com/wallet" target="_blank" style="color:var(--blue)">Coinbase Wallet</a> yukleyin.</div>';
 }
 
-function handleWalletAction() { if (acct) disconnect(); else openModal(); }
+function handleWalletAction(){if(acct)disconnect();else openModal();}
 
-async function connectWith(provider, rdns) {
-  try {
-    rawProv = provider;
-    var accounts = await rawProv.request({ method: 'eth_requestAccounts' });
-    if (!accounts || accounts.length === 0) throw new Error('Hesap bulunamadi');
-    acct = accounts[0];
-    prov = new ethers.BrowserProvider(rawProv);
-    sgn  = await prov.getSigner();
-    if (rdns !== 'farcaster') localStorage.setItem('lastWallet', rdns);
-    updateUIConnected();
-    closeModal();
-    await checkNetwork();
-    try {
-      rawProv.on('chainChanged', function(){ window.location.reload(); });
-      rawProv.on('accountsChanged', function(a){ if(a.length) window.location.reload(); else disconnect(); });
-    } catch(e){}
-  } catch(e) {
-    var msg = (e.code===4001) ? 'Baglanti reddedildi.' : (e.message||'Baglanti hatasi.').slice(0,60);
+async function connectWith(provider,rdns){
+  try{
+    rawProv=provider;
+    var accounts=await rawProv.request({method:'eth_requestAccounts'});
+    if(!accounts||accounts.length===0) throw new Error('Hesap bulunamadi');
+    acct=accounts[0]; prov=new ethers.BrowserProvider(rawProv); sgn=await prov.getSigner();
+    if(rdns!=='farcaster') localStorage.setItem('lastWallet',rdns);
+    updateUIConnected(); closeModal(); await checkNetwork();
+    try{rawProv.on('chainChanged',function(){window.location.reload();});rawProv.on('accountsChanged',function(a){if(a.length)window.location.reload();else disconnect();});}catch(e){}
+  }catch(e){
+    var msg=(e.code===4001)?'Baglanti reddedildi.':(e.message||'Baglanti hatasi.').slice(0,60);
     showToast('Hata: '+msg);
-    console.error('[Wallet]', e);
   }
 }
 
-async function checkNetwork() {
-  if (!rawProv) return;
-  try {
-    var chainId = await rawProv.request({ method: 'eth_chainId' });
-    var isBase = parseInt(chainId, 16) === 8453;
-    document.getElementById('net-warn').className = 'nwrn'+(isBase?'':' on');
-    var dot = document.getElementById('net-dot');
-    dot.className = 'dot '+(isBase?'green':'red');
-    document.getElementById('net-name').textContent = isBase ? 'Base Mainnet' : 'Yanlis Ag';
-    if (!isBase) showToast("Base Mainnet'e gecin!");
-  } catch(e){}
+async function checkNetwork(){
+  if(!rawProv) return;
+  try{
+    var chainId=await rawProv.request({method:'eth_chainId'});
+    var isBase=parseInt(chainId,16)===8453;
+    document.getElementById('net-warn').className='nwrn'+(isBase?'':' on');
+    var dot=document.getElementById('net-dot');
+    dot.className='dot '+(isBase?'green':'red');
+    document.getElementById('net-name').textContent=isBase?'Base Mainnet':'Yanlis Ag';
+    if(!isBase) showToast("Base Mainnet'e gecin!");
+  }catch(e){}
 }
 
-function updateUIConnected() {
-  document.getElementById('wlt-adr').textContent = acct.slice(0,6)+'...'+acct.slice(-4);
-  var btn = document.getElementById('con-btn');
-  btn.textContent = 'Baglantıyı Kes';
-  btn.classList.add('off');
-  if (acct.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) {
-    document.getElementById('tab-admin').classList.add('show');
-    updateAdminStats();
-  }
+function updateUIConnected(){
+  document.getElementById('wlt-adr').textContent=acct.slice(0,6)+'...'+acct.slice(-4);
+  var btn=document.getElementById('con-btn'); btn.textContent='Baglantıyı Kes'; btn.classList.add('off');
+  if(acct.toLowerCase()===ADMIN_ADDRESS.toLowerCase()){document.getElementById('tab-admin').classList.add('show');updateAdminStats();}
   updateAllStats();
 }
+function disconnect(){localStorage.removeItem('lastWallet');window.location.reload();}
 
-function disconnect() { localStorage.removeItem('lastWallet'); window.location.reload(); }
-
-async function switchToBase() {
-  if (!rawProv) return;
-  try {
-    await rawProv.request({ method:'wallet_switchEthereumChain', params:[{chainId:'0x2105'}] });
-  } catch(e) {
-    if (e.code === 4902) {
-      try {
-        await rawProv.request({ method:'wallet_addEthereumChain', params:[{
-          chainId:'0x2105', chainName:'Base Mainnet',
-          nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},
-          rpcUrls:['https://mainnet.base.org'],
-          blockExplorerUrls:['https://basescan.org']
-        }]});
-      } catch(e2){}
-    }
-  }
+async function switchToBase(){
+  if(!rawProv) return;
+  try{await rawProv.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x2105'}]});}
+  catch(e){if(e.code===4902){try{await rawProv.request({method:'wallet_addEthereumChain',params:[{chainId:'0x2105',chainName:'Base Mainnet',nativeCurrency:{name:'ETH',symbol:'ETH',decimals:18},rpcUrls:['https://mainnet.base.org'],blockExplorerUrls:['https://basescan.org']}]});}catch(e2){}}}
 }
 
-// ─── ADMIN STATS ─────────────────────────────────────────────────────────────
-async function updateAdminStats() {
-  if (!acct || acct.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) return;
-  try {
-    var bals = await Promise.all([
-      prov.getBalance(ADDR.CHECKIN),
-      prov.getBalance(ADDR.GM),
-      prov.getBalance(ADDR.GN),
-      prov.getBalance(ADDR.DICE),
-      prov.getBalance(ADDR.WHEEL)
-    ]);
-    var fmt = function(v){ return Number(ethers.formatEther(v)).toFixed(6)+' ETH'; };
-    ['bal-ck','bal-gm','bal-gn','bal-dice','bal-wheel'].forEach(function(id,i){
-      document.getElementById(id).textContent = fmt(bals[i]);
-    });
-    var total = bals.reduce(function(a,b){ return a+b; }, 0n);
-    document.getElementById('bal-total').textContent = fmt(total);
-  } catch(e){}
+// ─── ADMIN ───────────────────────────────────────────────────────────────────
+async function updateAdminStats(){
+  if(!acct||acct.toLowerCase()!==ADMIN_ADDRESS.toLowerCase()) return;
+  try{
+    var bals=await Promise.all([prov.getBalance(ADDR.CHECKIN),prov.getBalance(ADDR.GM),prov.getBalance(ADDR.GN),prov.getBalance(ADDR.DICE),prov.getBalance(ADDR.WHEEL)]);
+    var fmt=function(v){return Number(ethers.formatEther(v)).toFixed(6)+' ETH';};
+    ['bal-ck','bal-gm','bal-gn','bal-dice','bal-wheel'].forEach(function(id,i){document.getElementById(id).textContent=fmt(bals[i]);});
+    document.getElementById('bal-total').textContent=fmt(bals.reduce(function(a,b){return a+b;},0n));
+  }catch(e){}
 }
 
-// ─── WITHDRAW (estimateGas YOK — direkt TX) ──────────────────────────────────
-async function withdrawAll() {
+async function withdrawAll(){
   setSts('admin-sts','pnd','Kasalar kontrol ediliyor...');
-  var list = [
-    { c: new ethers.Contract(ADDR.CHECKIN, ABIS.CK,    sgn), a: ADDR.CHECKIN, name:'Check-in' },
-    { c: new ethers.Contract(ADDR.GM,      ABIS.MSG,   sgn), a: ADDR.GM,      name:'GM'       },
-    { c: new ethers.Contract(ADDR.GN,      ABIS.MSG,   sgn), a: ADDR.GN,      name:'GN'       },
-    { c: new ethers.Contract(ADDR.DICE,    ABIS.DICE,  sgn), a: ADDR.DICE,    name:'Dice'     },
-    { c: new ethers.Contract(ADDR.WHEEL,   ABIS.WHEEL, sgn), a: ADDR.WHEEL,   name:'Wheel'    }
+  var list=[
+    {c:new ethers.Contract(ADDR.CHECKIN,ABIS.CK,sgn),a:ADDR.CHECKIN,name:'Check-in'},
+    {c:new ethers.Contract(ADDR.GM,ABIS.MSG,sgn),a:ADDR.GM,name:'GM'},
+    {c:new ethers.Contract(ADDR.GN,ABIS.MSG,sgn),a:ADDR.GN,name:'GN'},
+    {c:new ethers.Contract(ADDR.DICE,ABIS.DICE,sgn),a:ADDR.DICE,name:'Dice'},
+    {c:new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn),a:ADDR.WHEEL,name:'Wheel'}
   ];
-  var success=[], failed=[], skipped=[];
-  for (var i=0; i<list.length; i++) {
-    var item = list[i];
-    try {
-      var bal = await prov.getBalance(item.a);
-      if (bal === 0n) { skipped.push(item.name); continue; }
+  var success=[],failed=[],skipped=[];
+  for(var i=0;i<list.length;i++){
+    var item=list[i];
+    try{
+      var bal=await prov.getBalance(item.a);
+      if(bal===0n){skipped.push(item.name);continue;}
       setSts('admin-sts','pnd',item.name+' cekiliyor... ('+(i+1)+'/5)');
-      // gasLimit manuel verilince ethers.js otomatik estimateGas CALLISTIRMAZ
-      var tx = await item.c.withdraw({ gasLimit: 100000n });
-      await tx.wait();
+      var tx=await item.c.withdraw({gasLimit:100000n}); await tx.wait();
       success.push(item.name);
-    } catch(e) {
-      // Hata detayını tam al
-      var errMsg = '';
-      if (e.reason) errMsg = e.reason;
-      else if (e.data && e.data.message) errMsg = e.data.message;
-      else if (e.message) errMsg = e.message;
-      else errMsg = 'bilinmeyen hata';
-      failed.push(item.name+': '+errMsg.slice(0,50));
+    }catch(e){
+      var em=e.reason||( e.data&&e.data.message)||e.message||'bilinmeyen';
+      failed.push(item.name+': '+em.slice(0,50));
     }
   }
   var msg='';
-  if (success.length) msg += success.join(', ')+' basariyla cekildi. ';
-  if (skipped.length) msg += skipped.join(', ')+' kasasi bos. ';
-  if (failed.length)  msg += 'HATA: '+failed.join(' | ');
-  if (failed.length > 0) {
-    setSts('admin-sts','err', msg.trim());
-  } else if (success.length === 0) {
-    setSts('admin-sts','ok','Tum kasalar bos.');
-  } else {
-    setSts('admin-sts','ok', msg.trim());
-    showToast(success.length+' kontrat cekildi!');
-  }
+  if(success.length) msg+=success.join(', ')+' cekildi. ';
+  if(skipped.length) msg+=skipped.join(', ')+' bos. ';
+  if(failed.length) msg+='HATA: '+failed.join(' | ');
+  if(failed.length>0) setSts('admin-sts','err',msg.trim());
+  else if(success.length===0) setSts('admin-sts','ok','Tum kasalar bos.');
+  else{setSts('admin-sts','ok',msg.trim());showToast(success.length+' kontrat cekildi!');}
   updateAdminStats();
 }
 
-// ─── ALL STATS ───────────────────────────────────────────────────────────────
-async function updateAllStats() {
-  if (!acct || !prov) return;
-  try {
-    var ck = new ethers.Contract(ADDR.CHECKIN, ABIS.CK,    prov);
-    var wc = new ethers.Contract(ADDR.WHEEL,   ABIS.WHEEL, prov);
-    var dc = new ethers.Contract(ADDR.DICE,    ABIS.DICE,  prov);
-    var cRes=[0n,0n,0n], wS=[0n], dS=[0n];
-    try { cRes = await Promise.all([ck.userStreaks(acct),ck.totalUserCheckIns(acct),ck.lastCheckIn(acct)]); } catch(e){}
-    try { wS = await wc.getPlayerStats(acct); } catch(e){}
-    try { dS = await dc.getPlayerStats(acct); } catch(e){}
+// ─── ALL STATS ────────────────────────────────────────────────────────────────
+async function updateAllStats(){
+  if(!acct||!prov) return;
+  try{
+    var ck=new ethers.Contract(ADDR.CHECKIN,ABIS.CK,prov);
+    var wc=new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,prov);
+    var dc=new ethers.Contract(ADDR.DICE,ABIS.DICE,prov);
+    var cRes=[0n,0n,0n],wS=[0n],dS=[0n];
+    try{cRes=await Promise.all([ck.userStreaks(acct),ck.totalUserCheckIns(acct),ck.lastCheckIn(acct)]);}catch(e){}
+    try{wS=await wc.getPlayerStats(acct);}catch(e){}
+    try{dS=await dc.getPlayerStats(acct);}catch(e){}
+    var checkInXP=Number(cRes[1]||0n)*10;
+    var totalXP=checkInXP+Number(wS[0]||0n)+Number(dS[0]||0n)+PM.xpEarned;
+    document.getElementById('ck-streak').textContent=cRes[0].toString();
+    document.getElementById('ck-total').textContent=totalXP.toLocaleString('tr-TR');
+    document.getElementById('xp-level-global').innerHTML=getLevel(totalXP);
 
-    var checkInXP = Number(cRes[1]||0n) * 10; // her check-in = 10 XP
-    var totalXP   = checkInXP + Number(wS[0]||0n) + Number(dS[0]||0n);
-    document.getElementById('ck-streak').textContent = cRes[0].toString();
-    document.getElementById('ck-total').textContent  = totalXP.toLocaleString('tr-TR');
-    document.getElementById('xp-level-global').innerHTML = getLevel(totalXP);
-
-    // ─── CHECK-IN ZAMAN KONTROLU ─────────────────────────────────────────────
-    // Kural: her gece UTC 00:00'da (= Turkiye 03:00) sifirlanir
-    // lastCheckIn kontratta Unix timestamp olarak saklanir
-    var lastTime = Number(cRes[2]); // Unix timestamp (saniye)
-    var nowTs = Math.floor(Date.now() / 1000);
-
-    // Turkiye gece yarisi = 00:00 TR = 21:00 UTC (UTC+3)
-    // Simdi hangi TR gunundeyiz?
-    var TR_OFFSET = 3 * 3600; // 3 saat = 10800 saniye
-    var nowTrTs = nowTs + TR_OFFSET; // TR saatindeki timestamp
-    var trDayStart = nowTrTs - (nowTrTs % 86400); // bugunun 00:00 TR'si (UTC cinsinden: trDayStart - TR_OFFSET)
-    var todayTrMidnightUtc = trDayStart + 86400 - TR_OFFSET; // bugunun 00:00 TR = 21:00 UTC
-
-    // Eger 21:00 UTC'yi gectik → bugunun reset'i gerceklesti
-    // Gecmedik → dunkunu kullan
-    var lastResetUtc, nextResetUtc;
-    if (nowTs >= todayTrMidnightUtc) {
-      lastResetUtc = todayTrMidnightUtc;
-      nextResetUtc = todayTrMidnightUtc + 86400;
-    } else {
-      lastResetUtc = todayTrMidnightUtc - 86400;
-      nextResetUtc = todayTrMidnightUtc;
-    }
-
-    // Check-in yapilabilir mi?
-    var canCk = (lastTime === 0) || (lastTime < lastResetUtc);
-
-    // Kalan sure
-    var diffSec = nextResetUtc - nowTs;
+    var lastTime=Number(cRes[2]);
+    var nowTs=Math.floor(Date.now()/1000);
+    var TR_OFFSET=3*3600;
+    var nowTrTs=nowTs+TR_OFFSET;
+    var trDayStart=nowTrTs-(nowTrTs%86400);
+    var todayTrMidnightUtc=trDayStart+86400-TR_OFFSET;
+    var lastResetUtc,nextResetUtc;
+    if(nowTs>=todayTrMidnightUtc){lastResetUtc=todayTrMidnightUtc;nextResetUtc=todayTrMidnightUtc+86400;}
+    else{lastResetUtc=todayTrMidnightUtc-86400;nextResetUtc=todayTrMidnightUtc;}
+    var canCk=(lastTime===0)||(lastTime<lastResetUtc);
+    var diffSec=nextResetUtc-nowTs;
     var statusTxt;
-    if (canCk) {
-      statusTxt = 'Hazir!';
-    } else {
-      var hh = Math.floor(diffSec / 3600);
-      var mm = Math.floor((diffSec % 3600) / 60);
-      statusTxt = hh + 's ' + mm + 'dk sonra (00:00 TR)';
-    }
-    document.getElementById('ck-status').textContent = statusTxt;
-    document.getElementById('ck-btn').disabled = !canCk;
-  } catch(e){}
+    if(canCk) statusTxt='Hazir!';
+    else{var hh=Math.floor(diffSec/3600),mm=Math.floor((diffSec%3600)/60);statusTxt=hh+'s '+mm+'dk sonra (00:00 TR)';}
+    document.getElementById('ck-status').textContent=statusTxt;
+    document.getElementById('ck-btn').disabled=!canCk;
+  }catch(e){}
 }
 
-// ─── CHECK-IN ────────────────────────────────────────────────────────────────
-async function doCheckIn() {
-  if (!acct) { openModal(); return; }
+// ─── CHECK-IN ─────────────────────────────────────────────────────────────────
+async function doCheckIn(){
+  if(!acct){openModal();return;}
   setSts('ck-sts','pnd','Imzalaniyor...');
-  try {
-    var ck = new ethers.Contract(ADDR.CHECKIN, ABIS.CK, sgn);
-    var tx = await ck.checkIn({ value: ethers.parseEther('0.00001') });
-    setSts('ck-sts','pnd','Zincirde dogrulanıyor...');
+  try{
+    var ck=new ethers.Contract(ADDR.CHECKIN,ABIS.CK,sgn);
+    var tx=await ck.checkIn({value:ethers.parseEther('0.00001')});
+    setSts('ck-sts','pnd','Dogrulanıyor...');
     await tx.wait();
     setSts('ck-sts','ok','Check-in basarili! +10 XP kazandin.');
     showToast('Check-in tamamlandi! +10 XP');
     updateAllStats();
-  } catch(e) {
-    var msg = e.code===4001 ? 'Islem reddedildi.' : (e.reason||e.message||'Hata').slice(0,80);
+  }catch(e){
+    var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'Hata').slice(0,80);
     setSts('ck-sts','err','Hata: '+msg);
   }
 }
 
-// ─── GM / GN ─────────────────────────────────────────────────────────────────
-async function sendMsg(t) {
-  if (!acct) { openModal(); return; }
+// ─── GM/GN ────────────────────────────────────────────────────────────────────
+async function sendMsg(t){
+  if(!acct){openModal();return;}
   setSts(t+'-sts','pnd','Imzalaniyor...');
-  try {
-    var c = new ethers.Contract(t==='gm'?ADDR.GM:ADDR.GN, ABIS.MSG, sgn);
-    var tx = await c[t]("", { value: ethers.parseEther('0.00001') });
+  try{
+    var c=new ethers.Contract(t==='gm'?ADDR.GM:ADDR.GN,ABIS.MSG,sgn);
+    var tx=await c[t]("",{value:ethers.parseEther('0.00001')});
     setSts(t+'-sts','pnd','Dogrulanıyor...');
     await tx.wait();
     setSts(t+'-sts','ok',(t==='gm'?'GM':'GN')+' gonderildi!');
-    showToast(t==='gm'?'Good Morning! ☀️':'Good Night! 🌙');
-  } catch(e) {
-    var msg = e.code===4001 ? 'Islem reddedildi.' : (e.reason||e.message||'').slice(0,80);
+    showToast(t==='gm'?'Good Morning!':'Good Night!');
+  }catch(e){
+    var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
     setSts(t+'-sts','err','Hata: '+msg);
   }
 }
 
-// ─── DICE ────────────────────────────────────────────────────────────────────
-var PIP_POS = {
-  1:[[30,30]], 2:[[15,15],[45,45]], 3:[[15,15],[30,30],[45,45]],
-  4:[[15,15],[45,15],[15,45],[45,45]], 5:[[15,15],[45,15],[30,30],[15,45],[45,45]],
-  6:[[15,12],[45,12],[15,30],[45,30],[15,48],[45,48]]
-};
-function drawDice(svgId, boxId, value, hl) {
-  var sv=document.getElementById(svgId), bx=document.getElementById(boxId);
-  sv.innerHTML=(PIP_POS[value]||PIP_POS[1]).map(function(p){
-    return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="'+(hl?'#7c3aed':'#1e293b')+'"/>';
-  }).join('');
-  bx.style.background = hl?'#ede9fe':'#fff';
+// ─── DICE ─────────────────────────────────────────────────────────────────────
+var PIP_POS={1:[[30,30]],2:[[15,15],[45,45]],3:[[15,15],[30,30],[45,45]],4:[[15,15],[45,15],[15,45],[45,45]],5:[[15,15],[45,15],[30,30],[15,45],[45,45]],6:[[15,12],[45,12],[15,30],[45,30],[15,48],[45,48]]};
+function drawDice(svgId,boxId,value,hl){
+  var sv=document.getElementById(svgId),bx=document.getElementById(boxId);
+  sv.innerHTML=(PIP_POS[value]||PIP_POS[1]).map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="'+(hl?'#7c3aed':'#1e293b')+'"/>';}).join('');
+  bx.style.background=hl?'#ede9fe':'#fff';
 }
-
-async function rollDice() {
-  if (!acct) { openModal(); return; }
+async function rollDice(){
+  if(!acct){openModal();return;}
   setSts('roll-sts','pnd','Zar atılıyor...');
-  try {
-    var c = new ethers.Contract(ADDR.DICE, ABIS.DICE, sgn);
-    var tx = await c.rollDice({ value: ethers.parseEther('0.00005') });
-    var ani = setInterval(function(){
-      drawDice('d1-svg','d1-box',Math.floor(Math.random()*6)+1);
-      drawDice('d2-svg','d2-box',Math.floor(Math.random()*6)+1);
-    },100);
-    var receipt = await tx.wait();
-    clearInterval(ani);
-    var iface = new ethers.Interface(ABIS.DICE);
-    var diceLog = receipt.logs.find(function(log){
-      try{ return iface.parseLog(log).name==="DiceRolled"; }catch(e){ return false; }
-    });
-    if (!diceLog) throw new Error('Event bulunamadi');
-    var parsed = iface.parseLog(diceLog);
-    var d1=Number(parsed.args[1]), d2=Number(parsed.args[2]), isDouble=(d1===d2);
-    drawDice('d1-svg','d1-box',d1,isDouble);
-    drawDice('d2-svg','d2-box',d2,isDouble);
-    document.getElementById('dice-res').textContent = d1+' + '+d2+' = '+(d1+d2)+(isDouble?' 🎊 DOUBLE!':'');
+  try{
+    var c=new ethers.Contract(ADDR.DICE,ABIS.DICE,sgn);
+    var tx=await c.rollDice({value:ethers.parseEther('0.00005')});
+    var ani=setInterval(function(){drawDice('d1-svg','d1-box',Math.floor(Math.random()*6)+1);drawDice('d2-svg','d2-box',Math.floor(Math.random()*6)+1);},100);
+    var receipt=await tx.wait(); clearInterval(ani);
+    var iface=new ethers.Interface(ABIS.DICE);
+    var diceLog=receipt.logs.find(function(log){try{return iface.parseLog(log).name==="DiceRolled";}catch(e){return false;}});
+    if(!diceLog) throw new Error('Event bulunamadi');
+    var parsed=iface.parseLog(diceLog);
+    var d1=Number(parsed.args[1]),d2=Number(parsed.args[2]),isDouble=(d1===d2);
+    drawDice('d1-svg','d1-box',d1,isDouble); drawDice('d2-svg','d2-box',d2,isDouble);
+    document.getElementById('dice-res').textContent=d1+' + '+d2+' = '+(d1+d2)+(isDouble?' DOUBLE!':'');
     setSts('roll-sts','ok',isDouble?'Cift! Bonus XP!':'Zar atildi!');
-    if (isDouble) showToast('🎊 Cift! Bonus XP!');
+    if(isDouble) showToast('Cift! Bonus XP!');
     updateAllStats();
-  } catch(e) {
-    var msg = e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
+  }catch(e){
+    var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
     setSts('roll-sts','err','Hata: '+msg);
   }
 }
 
-// ─── WHEEL ───────────────────────────────────────────────────────────────────
-function drawWheel(angle) {
-  var cv=document.getElementById('wheel-cv'), ctx=cv.getContext('2d'), step=Math.PI*2/16;
+// ─── WHEEL ────────────────────────────────────────────────────────────────────
+function drawWheel(angle){
+  var cv=document.getElementById('wheel-cv'),ctx=cv.getContext('2d'),step=Math.PI*2/16;
   ctx.clearRect(0,0,280,280);
-  for (var i=0; i<16; i++) {
-    ctx.beginPath(); ctx.moveTo(140,140);
-    ctx.arc(140,140,135,angle+i*step,angle+(i+1)*step);
-    ctx.fillStyle=COLORS[i]; ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.save(); ctx.translate(140,140); ctx.rotate(angle+i*step+step/2);
-    ctx.fillStyle='#fff'; ctx.font='bold 10px Space Mono'; ctx.textAlign='center';
-    ctx.fillText(SEGMENTS_XP[i]+' XP',88,4); ctx.restore();
+  for(var i=0;i<16;i++){
+    ctx.beginPath();ctx.moveTo(140,140);ctx.arc(140,140,135,angle+i*step,angle+(i+1)*step);
+    ctx.fillStyle=COLORS[i];ctx.fill();ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1;ctx.stroke();
+    ctx.save();ctx.translate(140,140);ctx.rotate(angle+i*step+step/2);
+    ctx.fillStyle='#fff';ctx.font='bold 10px Space Mono';ctx.textAlign='center';
+    ctx.fillText(SEGMENTS_XP[i]+' XP',88,4);ctx.restore();
   }
-  ctx.beginPath(); ctx.arc(140,140,18,0,Math.PI*2);
-  ctx.fillStyle='#fff'; ctx.fill();
-  ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=2; ctx.stroke();
-  ctx.fillStyle='#0052FF'; ctx.font='bold 10px Space Mono';
-  ctx.textAlign='center'; ctx.fillText('BASE',140,144);
+  ctx.beginPath();ctx.arc(140,140,18,0,Math.PI*2);
+  ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#0052FF';ctx.font='bold 10px Space Mono';ctx.textAlign='center';ctx.fillText('BASE',140,144);
 }
-
-async function spinWheel() {
-  if (!acct) { openModal(); return; }
-  var btn=document.getElementById('spin-btn'); btn.disabled=true;
+async function spinWheel(){
+  if(!acct){openModal();return;}
+  var btn=document.getElementById('spin-btn');btn.disabled=true;
   setSts('wheel-sts','pnd','Isleniyor...');
-  try {
-    var c = new ethers.Contract(ADDR.WHEEL, ABIS.WHEEL, sgn);
-    var tx = await c.spin({ value: ethers.parseEther('0.00005') });
+  try{
+    var c=new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn);
+    var tx=await c.spin({value:ethers.parseEther('0.00005')});
     setSts('wheel-sts','pnd','Dogrulanıyor...');
-    var receipt = await tx.wait();
-    var iface = new ethers.Interface(ABIS.WHEEL);
-    var wheelLog = receipt.logs.find(function(log){
-      try{ return iface.parseLog(log).name==="WheelSpun"; }catch(e){ return false; }
-    });
-    if (!wheelLog) throw new Error('Event bulunamadi');
-    var parsed=iface.parseLog(wheelLog), winIdx=Number(parsed.args[1]);
-    var step=Math.PI*2/16;
-    var targetA=-(winIdx*step+step/2)-Math.PI/2;
+    var receipt=await tx.wait();
+    var iface=new ethers.Interface(ABIS.WHEEL);
+    var wheelLog=receipt.logs.find(function(log){try{return iface.parseLog(log).name==="WheelSpun";}catch(e){return false;}});
+    if(!wheelLog) throw new Error('Event bulunamadi');
+    var parsed=iface.parseLog(wheelLog),winIdx=Number(parsed.args[1]);
+    var step=Math.PI*2/16,targetA=-(winIdx*step+step/2)-Math.PI/2;
     var totalR=Math.PI*2*7+targetA-(wheelAngle%(Math.PI*2));
-    var startA=wheelAngle, dur=4500, startT=performance.now();
-    function anim(now) {
+    var startA=wheelAngle,dur=4500,startT=performance.now();
+    function anim(now){
       var prog=Math.min((now-startT)/dur,1);
-      wheelAngle=startA+totalR*(1-Math.pow(1-prog,4));
-      drawWheel(wheelAngle);
-      if (prog<1) { requestAnimationFrame(anim); }
-      else {
+      wheelAngle=startA+totalR*(1-Math.pow(1-prog,4));drawWheel(wheelAngle);
+      if(prog<1){requestAnimationFrame(anim);}
+      else{
         var xp=SEGMENTS_XP[winIdx];
         document.getElementById('wheel-res').textContent='+'+xp+' XP kazandin!';
         setSts('wheel-sts','ok','Tebrikler! +'+xp+' XP!');
-        showToast('+'+xp+' XP kazandin!');
-        btn.disabled=false; updateAllStats();
+        showToast('+'+xp+' XP!');btn.disabled=false;updateAllStats();
       }
     }
     requestAnimationFrame(anim);
-  } catch(e) {
+  }catch(e){
     var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
-    setSts('wheel-sts','err','Hata: '+msg); btn.disabled=false;
+    setSts('wheel-sts','err','Hata: '+msg);btn.disabled=false;
   }
 }
 
-// ─── UI HELPERS ──────────────────────────────────────────────────────────────
-function switchTab(n) {
-  document.querySelectorAll('.tab,.pane').forEach(function(el){ el.classList.remove('on'); });
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function switchTab(n){
+  document.querySelectorAll('.tab,.pane').forEach(function(el){el.classList.remove('on');});
   document.getElementById('tab-'+n).classList.add('on');
   document.getElementById('pane-'+n).classList.add('on');
+  if(n==='games'){drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1);}
 }
-function openModal()  { document.getElementById('modal-bg').classList.add('on'); }
-function closeModal() { document.getElementById('modal-bg').classList.remove('on'); }
-function handleModalBgClick(e) { if(e.target===document.getElementById('modal-bg')) closeModal(); }
 
-function setSts(id, type, html) {
+function switchSubTab(n){
+  document.querySelectorAll('.sub-tab,.sub-pane').forEach(function(el){el.classList.remove('on');});
+  document.getElementById('stab-'+n).classList.add('on');
+  document.getElementById('spane-'+n).classList.add('on');
+  if(n==='wheel') drawWheel(wheelAngle);
+  if(n==='dice'){drawDice('d1-svg','d1-box',1);drawDice('d2-svg','d2-box',1);}
+  if(n==='pacman'&&!PM.started){pmDraw();}
+}
+
+function openModal(){document.getElementById('modal-bg').classList.add('on');}
+function closeModal(){document.getElementById('modal-bg').classList.remove('on');}
+function handleModalBgClick(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+function setSts(id,type,html){
   var el=document.getElementById(id);
   el.className='sts on '+type;
   el.innerHTML=(type==='pnd'?'<div class="spin"></div>':'')+'<span>'+html+'</span>';
 }
-function getLevel(xp) {
+function getLevel(xp){
   if(xp>=50000) return '&#128081; Elmas';
   if(xp>=10000) return '&#128142; Platin';
   if(xp>=5000)  return '&#129357; Altin';
@@ -811,25 +1095,16 @@ function getLevel(xp) {
   return '&#129355; Bronz';
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-window.onload = async function() {
-  drawDice('d1-svg','d1-box',1);
-  drawDice('d2-svg','d2-box',1);
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.onload=async function(){
+  drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1);
   drawWheel(0);
-
+  pmInitLevel(); pmDraw();
   await initFarcasterSDK();
-
-  if (!isFrameEnv) {
-    setTimeout(function(){
-      if(Object.keys(wlts).length===0) renderWallets();
-    }, 500);
-    var last = localStorage.getItem('lastWallet');
-    if (last) {
-      setTimeout(function(){
-        if(last==='browser'&&window.ethereum) connectWith(window.ethereum,'browser');
-        else if(wlts[last]) connectWith(wlts[last].provider,last);
-      }, 900);
-    }
+  if(!isFrameEnv){
+    setTimeout(function(){if(Object.keys(wlts).length===0)renderWallets();},500);
+    var last=localStorage.getItem('lastWallet');
+    if(last) setTimeout(function(){if(last==='browser'&&window.ethereum)connectWith(window.ethereum,'browser');else if(wlts[last])connectWith(wlts[last].provider,last);},900);
   }
 };
 </script>
