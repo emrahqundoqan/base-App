@@ -174,9 +174,57 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:99999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* XP WIDGET - sabit konum */
+#xp-widget{
+  position:fixed;top:12px;right:12px;z-index:1000;
+  background:linear-gradient(135deg,#0052FF,#7C3AED);
+  color:#fff;border-radius:20px;padding:6px 12px;
+  font-family:'Space Mono',monospace;font-size:12px;font-weight:700;
+  box-shadow:0 2px 12px rgba(0,82,255,.35);
+  display:flex;align-items:center;gap:5px;
+  transition:transform .2s;cursor:default;
+  pointer-events:none;
+}
+#xp-widget.pop{transform:scale(1.18);}
+#xp-widget-val{font-size:13px;}
+
+/* SAYI OYUNU */
+.numgame-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.num-btn{
+  padding:14px 0;border:2px solid var(--bdr);border-radius:10px;
+  background:var(--bg2);font-size:18px;font-weight:700;
+  cursor:pointer;transition:all .18s;font-family:'Space Mono',monospace;
+  color:var(--tx);
+}
+.num-btn:active{transform:scale(.94)}
+.num-btn.selected{background:var(--blue);color:#fff;border-color:var(--blue);transform:scale(1.07)}
+.num-btn.win{background:#10B981;color:#fff;border-color:#10B981;}
+.num-btn.lose{background:var(--bg3);color:var(--tx2);border-color:var(--bdr);}
+.spin-circle{
+  width:160px;height:160px;border-radius:50%;
+  border:5px solid var(--blue);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+  background:linear-gradient(135deg,var(--blue-light),var(--bg));
+  box-shadow:0 0 0 6px rgba(0,82,255,.12), inset 0 2px 12px rgba(0,82,255,.1);
+  position:relative;overflow:hidden;
+  transition:border-color .3s;
+}
+.spin-circle.spinning{animation:pulse-ring 0.4s ease infinite alternate;}
+.spin-circle.win-glow{border-color:#10B981;box-shadow:0 0 0 8px rgba(16,185,129,.2),0 0 30px rgba(16,185,129,.4);}
+.spin-circle.lose-glow{border-color:var(--red);box-shadow:0 0 0 8px rgba(239,68,68,.1);}
+@keyframes pulse-ring{from{box-shadow:0 0 0 4px rgba(0,82,255,.2);}to{box-shadow:0 0 0 10px rgba(0,82,255,.1);}}
+.spin-number{font-family:'Space Mono',monospace;font-size:64px;font-weight:700;line-height:1;color:var(--blue);}
+.spin-number.win-num{color:#10B981;}
+.spin-number.lose-num{color:var(--red);}
 </style>
 </head>
 <body>
+<div id="xp-widget">
+  <span>&#9889;</span>
+  <span id="xp-widget-val">0 XP</span>
+</div>
 <div class="wrap">
 
   <div class="hdr">
@@ -272,6 +320,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
       <button class="sub-tab on" id="stab-pacman" onclick="switchSubTab('pacman')">&#127919; Pic-Man</button>
       <button class="sub-tab" id="stab-dice" onclick="switchSubTab('dice')">&#127922; Zar</button>
       <button class="sub-tab" id="stab-wheel" onclick="switchSubTab('wheel')">&#127905; Cark</button>
+      <button class="sub-tab" id="stab-numgame" onclick="switchSubTab('numgame')">&#127921; Sayi</button>
     </div>
 
     <!-- SUB: PAC-MAN -->
@@ -350,6 +399,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
         <div class="wheel-res" id="wheel-res"></div>
         <button class="abtn abtn-dp" id="spin-btn" onclick="spinWheel()">&#127905; Carki Cevir!</button>
         <div class="sts" id="wheel-sts"></div>
+      </div>
+    </div>
+
+    <!-- SUB: SAYI OYUNU -->
+    <div class="sub-pane" id="spane-numgame">
+      <div class="card">
+        <div class="ctitle">&#127921; Sayi Tahmin Oyunu</div>
+        <p style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.5">
+          1-10 arasi bir sayi sec. Cark donsun!<br>
+          <b style="color:var(--blue)">Tuttursan +100 XP</b> &bull; Tutturamasan sectigin sayi kadar XP kazanirsin.
+        </p>
+
+        <!-- Sayı seçim grid -->
+        <div class="numgame-grid" id="ng-grid"></div>
+
+        <!-- Dönen daire -->
+        <div class="spin-circle" id="ng-circle">
+          <span class="spin-number" id="ng-number">?</span>
+        </div>
+
+        <!-- Sonuç -->
+        <div id="ng-result" style="text-align:center;font-size:15px;font-weight:700;min-height:24px;margin-bottom:14px;font-family:'Space Mono',monospace"></div>
+
+        <button class="abtn abtn-dp" id="ng-btn" onclick="ngSpin()" disabled>
+          Cevir
+        </button>
+        <div class="sts" id="ng-sts"></div>
       </div>
     </div>
   </div>
@@ -966,9 +1042,11 @@ async function updateAllStats(){
     try{wS=await wc.getPlayerStats(acct);}catch(e){}
     try{dS=await dc.getPlayerStats(acct);}catch(e){}
     var checkInXP=Number(cRes[1]||0n)*10;
-    var totalXP=checkInXP+Number(wS[0]||0n)+Number(dS[0]||0n)+PM.xpEarned;
+    var totalXP=checkInXP+Number(wS[0]||0n)+Number(dS[0]||0n)+PM.xpEarned+NG.localXP;
     document.getElementById('ck-streak').textContent=cRes[0].toString();
     document.getElementById('ck-total').textContent=totalXP.toLocaleString('tr-TR');
+    // XP widget - tum kaynaklarin toplami
+    setXPWidget(totalXP);
     document.getElementById('xp-level-global').innerHTML=getLevel(totalXP);
 
     var lastTime=Number(cRes[2]);
@@ -1105,6 +1183,134 @@ async function spinWheel(){
   }
 }
 
+// ─── SAYI TAHMIN OYUNU ──────────────────────────────────────────────────────
+var NG = {
+  selected: null,   // kullanıcının seçtiği sayı
+  spinning: false,
+  localXP: 0        // bu oturumda kazanılan XP
+};
+
+function ngInit() {
+  var grid = document.getElementById('ng-grid');
+  if (!grid || grid.children.length > 0) return;
+  for (var i = 1; i <= 10; i++) {
+    (function(num) {
+      var btn = document.createElement('button');
+      btn.className = 'num-btn';
+      btn.id = 'ng-num-' + num;
+      btn.textContent = num;
+      btn.onclick = function() { ngSelect(num); };
+      grid.appendChild(btn);
+    })(i);
+  }
+}
+
+function ngSelect(num) {
+  if (NG.spinning) return;
+  NG.selected = num;
+  // Tüm butonları sıfırla
+  for (var i = 1; i <= 10; i++) {
+    var b = document.getElementById('ng-num-' + i);
+    if (b) { b.className = 'num-btn' + (i === num ? ' selected' : ''); }
+  }
+  document.getElementById('ng-btn').disabled = false;
+  document.getElementById('ng-result').textContent = num + ' sectiniz';
+  document.getElementById('ng-result').style.color = 'var(--blue)';
+  // Daire sıfırla
+  var circle = document.getElementById('ng-circle');
+  circle.className = 'spin-circle';
+  var numEl = document.getElementById('ng-number');
+  numEl.className = 'spin-number';
+  numEl.textContent = '?';
+}
+
+function ngSpin() {
+  if (NG.selected === null || NG.spinning) return;
+  NG.spinning = true;
+  document.getElementById('ng-btn').disabled = true;
+  document.getElementById('ng-sts').className = 'sts';
+  document.getElementById('ng-result').textContent = '';
+
+  var circle = document.getElementById('ng-circle');
+  var numEl = document.getElementById('ng-number');
+  circle.className = 'spin-circle spinning';
+
+  // Sonucu önceden belirle (1-10 arası rastgele)
+  var result = Math.floor(Math.random() * 10) + 1;
+  var duration = 2200; // ms
+  var interval = 80;   // her kaçta bir sayı değişsin
+  var elapsed = 0;
+  var displayNum = 1;
+
+  // Hızlı sayı değişimi animasyonu
+  var ticker = setInterval(function() {
+    elapsed += interval;
+    // Sonuna yaklaştıkça yavaşla
+    if (elapsed > duration * 0.7) interval = 130;
+    if (elapsed > duration * 0.85) interval = 200;
+
+    displayNum = (displayNum % 10) + 1;
+    numEl.textContent = displayNum;
+
+    if (elapsed >= duration) {
+      clearInterval(ticker);
+      // Son sayıyı göster
+      numEl.textContent = result;
+      circle.className = 'spin-circle';
+      ngShowResult(result);
+    }
+  }, interval);
+}
+
+function ngShowResult(result) {
+  var selected = NG.selected;
+  var isWin = result === selected;
+  var xp = isWin ? 100 : selected;
+
+  NG.localXP += xp;
+  NG.spinning = false;
+
+  var circle = document.getElementById('ng-circle');
+  var numEl = document.getElementById('ng-number');
+  var resultEl = document.getElementById('ng-result');
+
+  if (isWin) {
+    circle.className = 'spin-circle win-glow';
+    numEl.className = 'spin-number win-num';
+    resultEl.textContent = 'SUPER! +100 XP kazandin!';
+    resultEl.style.color = '#10B981';
+    showToast('SUPER! +100 XP!');
+    // Kazanan butonu yeşile boya
+    var wb = document.getElementById('ng-num-' + result);
+    if (wb) wb.className = 'num-btn win selected';
+  } else {
+    circle.className = 'spin-circle lose-glow';
+    numEl.className = 'spin-number lose-num';
+    resultEl.textContent = selected + ' sectin, ' + result + ' geldi. +' + xp + ' XP!';
+    resultEl.style.color = 'var(--tx)';
+    showToast('+' + xp + ' XP kazandin!');
+    // Doğru sayıyı göster
+    for (var i = 1; i <= 10; i++) {
+      var b = document.getElementById('ng-num-' + i);
+      if (!b) continue;
+      if (i === result) b.className = 'num-btn win';
+      else if (i === selected) b.className = 'num-btn lose';
+      else b.className = 'num-btn';
+    }
+  }
+
+  setSts('ng-sts', 'ok', 'Bu turda +' + xp + ' XP! Toplam bu oyundan: ' + NG.localXP + ' XP');
+
+  // XP widget - önce localXP'yi artır, sonra widget'ı güncelle
+  updateXPWidget(xp); // animasyonlu artış
+
+  // Tekrar oynamak için butonu aktif et (1 sn sonra)
+  setTimeout(function() {
+    document.getElementById('ng-btn').disabled = false;
+    document.getElementById('ng-btn').textContent = 'Tekrar Cevir';
+  }, 1000);
+}
+
 // ─── UI HELPERS ───────────────────────────────────────────────────────────────
 function switchTab(n){
   document.querySelectorAll('.tab,.pane').forEach(function(el){el.classList.remove('on');});
@@ -1119,12 +1325,43 @@ function switchSubTab(n){
   document.getElementById('spane-'+n).classList.add('on');
   if(n==='wheel') drawWheel(wheelAngle);
   if(n==='dice'){drawDice('d1-svg','d1-box',1);drawDice('d2-svg','d2-box',1);}
-  if(n==='pacman'&&!PM.started){pmDraw();}
+  if(n==='pacman'&&!PM.started){pmDraw(1);}
+  if(n==='numgame'){ngInit();}
 }
 
 function openModal(){document.getElementById('modal-bg').classList.add('on');}
 function closeModal(){document.getElementById('modal-bg').classList.remove('on');}
 function handleModalBgClick(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+function updateXPWidget(addedXP) {
+  // addedXP: sadece animasyon için kullanılır
+  // Gerçek toplam: tüm kaynaklardan
+  var wv = document.getElementById('xp-widget-val');
+  var widget = document.getElementById('xp-widget');
+  if (!wv || !widget) return;
+  var current = parseInt(wv.textContent.replace(/[^0-9]/g,'')) || 0;
+  var target = current + (addedXP || 0);
+  var start = current, duration = 800, startT = performance.now();
+  function anim(now) {
+    var prog = Math.min((now - startT) / duration, 1);
+    var ease = 1 - Math.pow(1 - prog, 3);
+    var val = Math.round(start + (target - start) * ease);
+    wv.textContent = val.toLocaleString('tr-TR') + ' XP';
+    if (prog < 1) requestAnimationFrame(anim);
+    else { wv.textContent = target.toLocaleString('tr-TR') + ' XP'; }
+  }
+  requestAnimationFrame(anim);
+  widget.classList.add('pop');
+  setTimeout(function() { widget.classList.remove('pop'); }, 400);
+}
+
+function setXPWidget(totalXP) {
+  // Animasyonsuz — tüm kaynakların toplamını direkt yazar
+  var wv = document.getElementById('xp-widget-val');
+  var widget = document.getElementById('xp-widget');
+  if (!wv || !widget) return;
+  wv.textContent = totalXP.toLocaleString('tr-TR') + ' XP';
+}
 
 function setSts(id,type,html){
   var el=document.getElementById(id);
@@ -1142,6 +1379,8 @@ function getLevel(xp){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.onload=async function(){
   drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1);
+  // Sayi oyunu grid'i önceden oluştur
+  setTimeout(ngInit, 300);
   drawWheel(0);
   pmInitLevel(); pmDraw();
   await initFarcasterSDK();
