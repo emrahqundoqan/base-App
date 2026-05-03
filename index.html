@@ -406,6 +406,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <div class="sub-pane" id="spane-numgame">
       <div class="card">
         <div class="ctitle">&#127921; Sayi Tahmin Oyunu</div>
+        <div class="fbox fbox-dp" style="margin-bottom:12px">
+          <span style="color:var(--tx2)">Her oyun ucreti</span>
+          <span style="font-weight:700;font-family:'Space Mono',monospace">0.00001 ETH</span>
+        </div>
         <p style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.5">
           1-10 arasi bir sayi sec. Cark donsun!<br>
           <b style="color:var(--blue)">Tuttursan +100 XP</b> &bull; Tutturamasan sectigin sayi kadar XP kazanirsin.
@@ -442,6 +446,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
       <div class="irow"><span class="il">GN Kasasi</span><span id="bal-gn" class="iv">-- ETH</span></div>
       <div class="irow"><span class="il">Zar Oyunu Kasasi</span><span id="bal-dice" class="iv">-- ETH</span></div>
       <div class="irow"><span class="il">Cark Oyunu Kasasi</span><span id="bal-wheel" class="iv">-- ETH</span></div>
+      <div class="irow"><span class="il">Sayi Oyunu Kasasi</span><span id="bal-number" class="iv">-- ETH</span></div>
       <div class="irow" style="border-bottom:none;padding-top:12px">
         <span style="font-weight:700">Toplam</span>
         <span id="bal-total" class="iv" style="color:var(--blue)">-- ETH</span>
@@ -467,14 +472,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 <script>
 // ─── SABITLER ────────────────────────────────────────────────────────────────
 var ADMIN_ADDRESS='0xca37E522b57FEebc6f371EA500ecBf1e408FfD2c';
-var ADDR={CHECKIN:'0xb4e5E1C7D4b0e846645F49995024D570A0A6218c',GM:'0xfDeb4a6C1f8a96D1817e29916047dEa53e70111E',GN:'0x5A4F2A0C1134efBCe9a4Debc7B000007Cdb637B9',WHEEL:'0x39b91858e45C33Bd6407c27449fdC773EE288cdC',DICE:'0xB1c153F5b8eB0AB275c4ed721606D814750EFea9'};
+var ADDR={CHECKIN:'0xb4e5E1C7D4b0e846645F49995024D570A0A6218c',GM:'0xfDeb4a6C1f8a96D1817e29916047dEa53e70111E',GN:'0x5A4F2A0C1134efBCe9a4Debc7B000007Cdb637B9',WHEEL:'0x39b91858e45C33Bd6407c27449fdC773EE288cdC',DICE:'0xB1c153F5b8eB0AB275c4ed721606D814750EFea9',NUMBER:'0x0eDc71073B43AE60a4ff6e54b827534CbF3b66e5'};
 var SEGMENTS_XP=[10,25,50,5,30,10,55,100,15,20,35,40,60,65,70,75];
 var COLORS=["#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#6366f1","#0ea5e9","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316"];
 var ABIS={
   CK:["function checkIn() payable","function userStreaks(address) view returns (uint256)","function totalUserCheckIns(address) view returns (uint256)","function lastCheckIn(address) view returns (uint256)","function withdraw() external"],
   MSG:["function gm(string) payable","function gn(string) payable","function withdraw() external"],
   WHEEL:["function spin() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event WheelSpun(address indexed player, uint8 segment, uint256 xpEarned, uint256 totalXP)"],
-  DICE:["function rollDice() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event DiceRolled(address indexed player, uint8 d1, uint8 d2, bool isD, uint256 xp, uint256 txp)"]
+  DICE:["function rollDice() payable","function getPlayerStats(address) view returns (uint256,uint256,uint256,uint256)","function withdraw() external","event DiceRolled(address indexed player, uint8 d1, uint8 d2, bool isD, uint256 xp, uint256 txp)"],
+  NUMBER:["function play(uint8 chosen, uint8 result) payable","function getPlayerStats(address) view returns (uint256,uint256,uint256)","function withdraw() external","event GamePlayed(address indexed player, uint8 chosen, uint8 result, uint256 xpEarned, uint256 totalXP)"]
 };
 
 // ─── GLOBAL ──────────────────────────────────────────────────────────────────
@@ -990,9 +996,9 @@ async function switchToBase(){
 async function updateAdminStats(){
   if(!acct||acct.toLowerCase()!==ADMIN_ADDRESS.toLowerCase()) return;
   try{
-    var bals=await Promise.all([prov.getBalance(ADDR.CHECKIN),prov.getBalance(ADDR.GM),prov.getBalance(ADDR.GN),prov.getBalance(ADDR.DICE),prov.getBalance(ADDR.WHEEL)]);
+    var bals=await Promise.all([prov.getBalance(ADDR.CHECKIN),prov.getBalance(ADDR.GM),prov.getBalance(ADDR.GN),prov.getBalance(ADDR.DICE),prov.getBalance(ADDR.WHEEL),prov.getBalance(ADDR.NUMBER)]);
     var fmt=function(v){return Number(ethers.formatEther(v)).toFixed(6)+' ETH';};
-    ['bal-ck','bal-gm','bal-gn','bal-dice','bal-wheel'].forEach(function(id,i){document.getElementById(id).textContent=fmt(bals[i]);});
+    ['bal-ck','bal-gm','bal-gn','bal-dice','bal-wheel','bal-number'].forEach(function(id,i){document.getElementById(id).textContent=fmt(bals[i]);});
     document.getElementById('bal-total').textContent=fmt(bals.reduce(function(a,b){return a+b;},0n));
   }catch(e){}
 }
@@ -1004,7 +1010,8 @@ async function withdrawAll(){
     {c:new ethers.Contract(ADDR.GM,ABIS.MSG,sgn),a:ADDR.GM,name:'GM'},
     {c:new ethers.Contract(ADDR.GN,ABIS.MSG,sgn),a:ADDR.GN,name:'GN'},
     {c:new ethers.Contract(ADDR.DICE,ABIS.DICE,sgn),a:ADDR.DICE,name:'Dice'},
-    {c:new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn),a:ADDR.WHEEL,name:'Wheel'}
+    {c:new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn),a:ADDR.WHEEL,name:'Wheel'},
+    {c:new ethers.Contract(ADDR.NUMBER,ABIS.NUMBER,sgn),a:ADDR.NUMBER,name:'NumberGame'}
   ];
   var success=[],failed=[],skipped=[];
   for(var i=0;i<list.length;i++){
@@ -1224,8 +1231,10 @@ function ngSelect(num) {
   numEl.textContent = '?';
 }
 
-function ngSpin() {
+async function ngSpin() {
   if (NG.selected === null || NG.spinning) return;
+  if (!acct) { openModal(); return; }
+
   NG.spinning = true;
   document.getElementById('ng-btn').disabled = true;
   document.getElementById('ng-sts').className = 'sts';
@@ -1237,33 +1246,56 @@ function ngSpin() {
 
   // Sonucu önceden belirle (1-10 arası rastgele)
   var result = Math.floor(Math.random() * 10) + 1;
-  var duration = 2200; // ms
-  var interval = 80;   // her kaçta bir sayı değişsin
+  var chosen = NG.selected;
+
+  // Kontrat çağrısı — animasyonla paralel çalışır
+  var txPromise = null;
+  try {
+    var c = new ethers.Contract(ADDR.NUMBER, ABIS.NUMBER, sgn);
+    txPromise = c.play(chosen, result, { value: ethers.parseEther('0.00001') });
+  } catch(e) {
+    NG.spinning = false;
+    document.getElementById('ng-btn').disabled = false;
+    circle.className = 'spin-circle';
+    setSts('ng-sts','err','Hata: '+(e.message||'').slice(0,60));
+    return;
+  }
+
+  // Animasyon
+  var duration = 2200;
+  var interval = 80;
   var elapsed = 0;
   var displayNum = 1;
 
-  // Hızlı sayı değişimi animasyonu
   var ticker = setInterval(function() {
     elapsed += interval;
-    // Sonuna yaklaştıkça yavaşla
     if (elapsed > duration * 0.7) interval = 130;
     if (elapsed > duration * 0.85) interval = 200;
-
     displayNum = (displayNum % 10) + 1;
     numEl.textContent = displayNum;
-
     if (elapsed >= duration) {
       clearInterval(ticker);
-      // Son sayıyı göster
       numEl.textContent = result;
       circle.className = 'spin-circle';
-      ngShowResult(result);
+      // TX onayını bekle
+      setSts('ng-sts','pnd','Zincirde dogrulanıyor...');
+      txPromise.then(function(tx) {
+        return tx.wait();
+      }).then(function() {
+        ngShowResult(result, chosen);
+      }).catch(function(e) {
+        NG.spinning = false;
+        document.getElementById('ng-btn').disabled = false;
+        circle.className = 'spin-circle';
+        var msg = e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,60);
+        setSts('ng-sts','err','Hata: '+msg);
+      });
     }
   }, interval);
 }
 
-function ngShowResult(result) {
-  var selected = NG.selected;
+function ngShowResult(result, selected) {
+  if (selected === undefined) selected = NG.selected;
   var isWin = result === selected;
   var xp = isWin ? 100 : selected;
 
