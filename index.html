@@ -22,6 +22,7 @@
 <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://basefun-app.vercel.app/og.png","button":{"title":"Oyna","action":{"type":"launch_frame","name":"Base Fun","url":"https://basefun-app.vercel.app","splashImageUrl":"https://basefun-app.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}'/>
 <meta name="fc:frame" content='{"version":"next","imageUrl":"https://basefun-app.vercel.app/og.png","button":{"title":"Oyna","action":{"type":"launch_frame","name":"Base Fun","url":"https://basefun-app.vercel.app","splashImageUrl":"https://basefun-app.vercel.app/splash.png","splashBackgroundColor":"#0052FF"}}}'/>
 <meta name="base:app_id" content="69ec76d08502c283edbf9477"/>
+<meta name="talentapp:project_verification" content="aa6afa365760fe7494fb544d80711d0f4123a66176703366fdb8ccae90bee19ebe750ac9ab01276e88e501bc4219381f01a8cf29309e72983ee779046e075491"/>
 <meta name="theme-color" content="#0052FF"/>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="icon" href="https://basefun-app.vercel.app/icon-192.png" type="image/png"/>
@@ -1241,19 +1242,17 @@ async function ngSpin() {
   circle.className = 'spin-circle spinning';
   numEl.textContent = '?';
 
-  var duration = 2200;
-  var intervalMs = 80;
+  // 10 saniye animasyon
+  var duration = 10000;
+  var intervalMs = 60;   // başlangıçta hızlı
   var elapsed = 0;
   var displayNum = 1;
 
-  // Animasyon ve TX onayını paralel çalıştır
+  // TX onayını arka planda bekle
   var txDone = false;
   var animDone = false;
-  var receipt = null;
 
-  // TX'i bekle (arka planda)
-  tx.wait().then(function(r) {
-    receipt = r;
+  tx.wait().then(function() {
     txDone = true;
     if (animDone) ngFinish(result, chosen);
   }).catch(function(e) {
@@ -1263,21 +1262,30 @@ async function ngSpin() {
     setSts('ng-sts','err','TX hatasi: '+(e.reason||e.message||'').slice(0,60));
   });
 
-  // Animasyon
-  var ticker = setInterval(function() {
+  // 10 saniyelik animasyon — önce hızlı, sonra yavaşlar
+  function runTick() {
     elapsed += intervalMs;
-    if (elapsed > duration * 0.7) intervalMs = 130;
-    if (elapsed > duration * 0.85) intervalMs = 200;
     displayNum = (displayNum % 10) + 1;
     numEl.textContent = displayNum;
+
+    // Hız kademeleri
+    if (elapsed < 3000)       intervalMs = 60;   // 0-3s: çok hızlı
+    else if (elapsed < 6000)  intervalMs = 100;  // 3-6s: orta
+    else if (elapsed < 8500)  intervalMs = 160;  // 6-8.5s: yavaş
+    else if (elapsed < 9500)  intervalMs = 250;  // 8.5-9.5s: çok yavaş
+    else                      intervalMs = 400;  // son saniye: durur gibi
+
     if (elapsed >= duration) {
-      clearInterval(ticker);
+      // Animasyon bitti — sonucu göster
       numEl.textContent = result;
       circle.className = 'spin-circle';
       animDone = true;
       if (txDone) ngFinish(result, chosen);
+      return;
     }
-  }, intervalMs);
+    setTimeout(runTick, intervalMs);
+  }
+  setTimeout(runTick, intervalMs);
 }
 
 function ngFinish(result, chosen) {
