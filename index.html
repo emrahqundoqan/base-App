@@ -1235,6 +1235,9 @@ async function ngSpin() {
   if (NG.selected === null || NG.spinning) return;
   if (!acct) { openModal(); return; }
 
+  var chosen = NG.selected;
+  var result = Math.floor(Math.random() * 10) + 1;
+
   NG.spinning = true;
   document.getElementById('ng-btn').disabled = true;
   document.getElementById('ng-sts').className = 'sts';
@@ -1242,56 +1245,67 @@ async function ngSpin() {
 
   var circle = document.getElementById('ng-circle');
   var numEl = document.getElementById('ng-number');
-  circle.className = 'spin-circle spinning';
 
-  // Sonucu önceden belirle (1-10 arası rastgele)
-  var result = Math.floor(Math.random() * 10) + 1;
-  var chosen = NG.selected;
-
-  // Kontrat çağrısı — animasyonla paralel çalışır
-  var txPromise = null;
+  // ADIM 1: Önce cüzdan onayını al
+  setSts('ng-sts','pnd','Cuzdan onayi bekleniyor...');
+  var tx;
   try {
     var c = new ethers.Contract(ADDR.NUMBER, ABIS.NUMBER, sgn);
-    txPromise = c.play(chosen, result, { value: ethers.parseEther('0.00001') });
+    tx = await c.play(chosen, result, { value: ethers.parseEther('0.00001') });
   } catch(e) {
     NG.spinning = false;
     document.getElementById('ng-btn').disabled = false;
-    circle.className = 'spin-circle';
-    setSts('ng-sts','err','Hata: '+(e.message||'').slice(0,60));
+    var msg = e.code===4001 ? 'Islem reddedildi.' : (e.reason||e.message||'').slice(0,60);
+    setSts('ng-sts','err','Hata: '+msg);
     return;
   }
 
-  // Animasyon
+  // ADIM 2: Onay alındı → animasyonu başlat
+  setSts('ng-sts','pnd','Zincirde dogrulanıyor...');
+  circle.className = 'spin-circle spinning';
+  numEl.textContent = '?';
+
   var duration = 2200;
-  var interval = 80;
+  var intervalMs = 80;
   var elapsed = 0;
   var displayNum = 1;
 
+  // Animasyon ve TX onayını paralel çalıştır
+  var txDone = false;
+  var animDone = false;
+  var receipt = null;
+
+  // TX'i bekle (arka planda)
+  tx.wait().then(function(r) {
+    receipt = r;
+    txDone = true;
+    if (animDone) ngFinish(result, chosen);
+  }).catch(function(e) {
+    NG.spinning = false;
+    document.getElementById('ng-btn').disabled = false;
+    circle.className = 'spin-circle';
+    setSts('ng-sts','err','TX hatasi: '+(e.reason||e.message||'').slice(0,60));
+  });
+
+  // Animasyon
   var ticker = setInterval(function() {
-    elapsed += interval;
-    if (elapsed > duration * 0.7) interval = 130;
-    if (elapsed > duration * 0.85) interval = 200;
+    elapsed += intervalMs;
+    if (elapsed > duration * 0.7) intervalMs = 130;
+    if (elapsed > duration * 0.85) intervalMs = 200;
     displayNum = (displayNum % 10) + 1;
     numEl.textContent = displayNum;
     if (elapsed >= duration) {
       clearInterval(ticker);
       numEl.textContent = result;
       circle.className = 'spin-circle';
-      // TX onayını bekle
-      setSts('ng-sts','pnd','Zincirde dogrulanıyor...');
-      txPromise.then(function(tx) {
-        return tx.wait();
-      }).then(function() {
-        ngShowResult(result, chosen);
-      }).catch(function(e) {
-        NG.spinning = false;
-        document.getElementById('ng-btn').disabled = false;
-        circle.className = 'spin-circle';
-        var msg = e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,60);
-        setSts('ng-sts','err','Hata: '+msg);
-      });
+      animDone = true;
+      if (txDone) ngFinish(result, chosen);
     }
-  }, interval);
+  }, intervalMs);
+}
+
+function ngFinish(result, chosen) {
+  ngShowResult(result, chosen);
 }
 
 function ngShowResult(result, selected) {
