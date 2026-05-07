@@ -124,7 +124,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 
 /* GAMES SUB-TABS */
 .sub-tabs{display:flex;gap:6px;margin-bottom:16px}
-.sub-tab{flex:1;padding:10px 6px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:'DM Sans',sans-serif;transition:all .18s;text-align:center}
+.sub-tab{flex:1;padding:9px 4px;border:1.5px solid var(--bdr);background:var(--bg2);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:'DM Sans',sans-serif;transition:all .18s;text-align:center;white-space:nowrap}
 .sub-tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 
 .sub-pane{display:none}.sub-pane.on{display:block}
@@ -178,7 +178,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 
 /* XP WIDGET - sabit konum */
 #xp-widget{
-  position:fixed;top:12px;right:12px;z-index:1000;
+  position:fixed;top:58px;right:12px;z-index:1000;
   background:linear-gradient(135deg,#0052FF,#7C3AED);
   color:#fff;border-radius:20px;padding:6px 12px;
   font-family:'Space Mono',monospace;font-size:12px;font-weight:700;
@@ -354,7 +354,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
           <button ontouchstart="pmDir(0,-1)" onmousedown="pmDir(0,-1)">&#8593;</button>
           <div class="empty"></div>
           <button ontouchstart="pmDir(-1,0)" onmousedown="pmDir(-1,0)">&#8592;</button>
-          <button ontouchstart="pmStartOrRestart()" onmousedown="pmStartOrRestart()" style="font-size:14px;font-weight:700">&#9654;</button>
+          <button ontouchstart="pmStartOrRestart()" onmousedown="pmStartOrRestart()" style="font-size:10px;font-weight:700">&#9654;</button>
           <button ontouchstart="pmDir(1,0)" onmousedown="pmDir(1,0)">&#8594;</button>
           <div class="empty"></div>
           <button ontouchstart="pmDir(0,1)" onmousedown="pmDir(0,1)">&#8595;</button>
@@ -838,6 +838,7 @@ function pmLevelComplete(){
   PM.level++;
   document.getElementById('pm-level').textContent=PM.level+' / 21';
   pmShowMsg('SEVIYE '+(PM.level-1)+' TAMAM!','+'+xp+' XP — Devam icin ► bas');
+  pmDraw(1); // Son frame'i göster
 }
 
 function pmGameOver(){
@@ -846,6 +847,7 @@ function pmGameOver(){
   PM.gameOver=true;
   pmShowMsg('OYUN BITTI','Skor: '+PM.score+' — Tekrar icin ► bas');
   setSts('pm-sts','err','Oyun bitti. XP: '+PM.xpEarned);
+  pmDraw(1);
 }
 
 function pmStartOrRestart(){
@@ -996,7 +998,7 @@ async function withdrawAll(){
     try{
       var bal=await prov.getBalance(item.a);
       if(bal===0n){skipped.push(item.name);continue;}
-      setSts('admin-sts','pnd',item.name+' cekiliyor... ('+(i+1)+'/5)');
+      setSts('admin-sts','pnd',item.name+' cekiliyor... ('+(i+1)+'/6)');
       var tx=await item.c.withdraw({gasLimit:100000n}); await tx.wait();
       success.push(item.name);
     }catch(e){
@@ -1331,8 +1333,10 @@ function ngShowResult(result, selected) {
 
   setSts('ng-sts', 'ok', 'Bu turda +' + xp + ' XP! Toplam bu oyundan: ' + NG.localXP + ' XP');
 
-  // XP widget - önce localXP'yi artır, sonra widget'ı güncelle
-  updateXPWidget(xp); // animasyonlu artış
+  // XP widget - animasyonlu artış göster, sonra updateAllStats ile gerçek toplamı yaz
+  updateXPWidget(xp);
+  // Kısa gecikme sonrası updateAllStats (on-chain XP + localXP toplamı)
+  setTimeout(function(){ updateAllStats(); }, 1200);
 
   // Tekrar oynamak için butonu aktif et (1 sn sonra)
   setTimeout(function() {
@@ -1346,7 +1350,7 @@ function switchTab(n){
   document.querySelectorAll('.tab,.pane').forEach(function(el){el.classList.remove('on');});
   document.getElementById('tab-'+n).classList.add('on');
   document.getElementById('pane-'+n).classList.add('on');
-  if(n==='games'){drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1);}
+  if(n==='games'){ drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); if(!PM.started) pmDraw(1); }
 }
 
 function switchSubTab(n){
@@ -1412,7 +1416,7 @@ window.onload=async function(){
   // Sayi oyunu grid'i önceden oluştur
   setTimeout(ngInit, 300);
   drawWheel(0);
-  pmInitLevel(); pmDraw();
+  pmInit(); pmDraw(1);
   await initFarcasterSDK();
   if(!isFrameEnv){
     setTimeout(function(){if(Object.keys(wlts).length===0)renderWallets();},500);
