@@ -349,16 +349,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
           <canvas id="pm-canvas" width="280" height="280"></canvas>
           <div id="pm-msg"></div>
         </div>
-        <div class="pm-dpad">
-          <div class="empty"></div>
-          <button ontouchstart="pmDir(0,-1)" onmousedown="pmDir(0,-1)">&#8593;</button>
-          <div class="empty"></div>
-          <button ontouchstart="pmDir(-1,0)" onmousedown="pmDir(-1,0)">&#8592;</button>
-          <button ontouchstart="pmStartOrRestart()" onmousedown="pmStartOrRestart()" style="font-size:10px;font-weight:700">&#9654;</button>
-          <button ontouchstart="pmDir(1,0)" onmousedown="pmDir(1,0)">&#8594;</button>
-          <div class="empty"></div>
-          <button ontouchstart="pmDir(0,1)" onmousedown="pmDir(0,1)">&#8595;</button>
-          <div class="empty"></div>
+        <div style="position:relative">
+          <div class="pm-dpad">
+            <div class="empty"></div>
+            <button ontouchstart="pmDir(0,-1)" onmousedown="pmDir(0,-1)">&#8593;</button>
+            <div class="empty"></div>
+            <button ontouchstart="pmDir(-1,0)" onmousedown="pmDir(-1,0)">&#8592;</button>
+            <div class="empty"></div>
+            <button ontouchstart="pmDir(1,0)" onmousedown="pmDir(1,0)">&#8594;</button>
+            <div class="empty"></div>
+            <button ontouchstart="pmDir(0,1)" onmousedown="pmDir(0,1)">&#8595;</button>
+            <div class="empty"></div>
+          </div>
+          <!-- Play butonu sağ altta -->
+          <button ontouchstart="pmStartOrRestart()" onmousedown="pmStartOrRestart()"
+            style="position:absolute;bottom:0;right:0;width:44px;height:44px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 8px rgba(0,82,255,.3)">&#9654;</button>
         </div>
         <div style="font-size:11px;color:var(--tx2);text-align:center;margin-top:10px">
           Tum yiyecekleri topla! Her seviye +XP kazan.
@@ -612,8 +617,10 @@ function pmTickPac(){
       if(PM.col<0){ PM.col=PM.COLS-1; PM.prevCol=PM.COLS-1; }
       if(PM.col>=PM.COLS){ PM.col=0; PM.prevCol=0; }
     } else {
-      // Duvara çarptı: yönü sıfırla ama ndx/ndy'i koru
-      PM.dx=0; PM.dy=0;
+      // Duvara çarptı: Pac-Man durur ama yön korunur
+      // ndxTtl'i sıfırla ki mevcut yön isteği (ndx/ndy) yeniden denensin
+      // dx/dy'i KORUYORUZ — böylece dönüş noktasına gelince otomatik devam eder
+      // Sadece hareket etmiyoruz, yön hafızası var
     }
   }
   pmEatPellet();
@@ -830,10 +837,17 @@ function pmLevelComplete(){
   PM.xpEarned+=xp;
   document.getElementById('pm-xp-earned').textContent=PM.xpEarned;
   showToast('Seviye '+PM.level+' tamam! +'+xp+' XP');
+
+  // XP widget'ı animasyonlu güncelle + ana XP sayacını güncelle
+  updateXPWidget(xp);
+  setTimeout(function(){ updateAllStats(); }, 1000);
+
   if(PM.level>=21){
     pmShowMsg('TEBRIKLER!','Tum 21 seviye tamamlandi!');
     setSts('pm-sts','ok','Harika! Toplam '+PM.xpEarned+' XP!');
-    PM.gameOver=true; return;
+    PM.gameOver=true;
+    pmDraw(1);
+    return;
   }
   PM.level++;
   document.getElementById('pm-level').textContent=PM.level+' / 21';
@@ -852,13 +866,23 @@ function pmGameOver(){
 
 function pmStartOrRestart(){
   if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
-  PM.level=1; PM.score=0; PM.lives=3; PM.xpEarned=0;
-  PM.gameOver=false; PM.started=true; PM.running=false;
-  document.getElementById('pm-score').textContent='0';
-  document.getElementById('pm-level').textContent='1 / 21';
-  document.getElementById('pm-xp-earned').textContent='0';
-  document.getElementById('pm-sts').className='sts';
-  pmUpdateLives();
+
+  // Eğer oyun bittiyse (game over veya hiç başlamadıysa) → tamamen sıfırla
+  // Eğer seviye tamamlandıysa (gameOver=false, started=true, running=false) → sonraki seviyeye geç
+  var isLevelComplete = PM.started && !PM.running && !PM.gameOver;
+
+  if(!isLevelComplete){
+    // Yeni oyun: her şeyi sıfırla
+    PM.level=1; PM.score=0; PM.lives=3; PM.xpEarned=0;
+    PM.gameOver=false;
+    document.getElementById('pm-score').textContent='0';
+    document.getElementById('pm-level').textContent='1 / 21';
+    document.getElementById('pm-xp-earned').textContent='0';
+    document.getElementById('pm-sts').className='sts';
+    pmUpdateLives();
+  }
+  // Her iki durumda da: haritayı yükle, başlat
+  PM.started=true; PM.running=false;
   pmInit();
   pmHideMsg();
   pmDraw(1);
