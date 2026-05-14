@@ -176,6 +176,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:99999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* PROFILE */
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;box-shadow:0 0 0 4px rgba(0,82,255,.15)}
+.profile-addr{font-family:'Space Mono',monospace;font-size:12px;color:var(--tx2);text-align:center;margin-bottom:4px;word-break:break-all}
+.profile-level{text-align:center;margin-bottom:16px}
+.xp-source-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--bdr);font-size:13px}
+.xp-source-row:last-of-type{border-bottom:none}
+.xp-source-icon{font-size:18px;margin-right:8px}
+.xp-source-name{flex:1;color:var(--tx2)}
+.xp-source-val{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:var(--blue)}
+.xp-total-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:8px;border-top:2px solid var(--bdr);font-size:15px;font-weight:700}
+.xp-total-val{font-family:'Space Mono',monospace;font-size:18px;color:var(--blue)}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:.5px solid var(--bdr);background:var(--bg2)}
+
 /* XP WIDGET - sabit konum */
 #xp-widget{
   position:fixed;top:58px;right:12px;z-index:1000;
@@ -262,6 +276,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <button class="tab on" id="tab-checkin" onclick="switchTab('checkin')">&#128197; Check-in</button>
     <button class="tab" id="tab-gm" onclick="switchTab('gm')">&#9728; GM/GN</button>
     <button class="tab" id="tab-games" onclick="switchTab('games')">&#127918; Games</button>
+    <button class="tab" id="tab-profile" onclick="switchTab('profile')">&#128100; Profil</button>
     <button class="tab tab-admin" id="tab-admin" onclick="switchTab('admin')">&#128273; Admin</button>
   </div>
 
@@ -440,6 +455,66 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
+  <!-- PANE: PROFILE -->
+  <div class="pane" id="pane-profile">
+    <div class="card">
+      <div class="profile-avatar">&#128100;</div>
+      <div class="profile-addr" id="prof-addr">Cuzdan baglanmadi</div>
+      <div class="profile-level"><span id="prof-level" class="lvl-badge">&#129355; Bronz</span></div>
+      <div class="ctitle">XP Kaynaklari</div>
+      <div class="xp-source-row">
+        <span class="xp-source-icon">&#128197;</span>
+        <span class="xp-source-name">Check-in</span>
+        <span class="xp-source-val" id="prof-xp-checkin">0 XP</span>
+      </div>
+      <div class="xp-source-row">
+        <span class="xp-source-icon">&#9728;</span>
+        <span class="xp-source-name">GM / GN</span>
+        <span class="xp-source-val" id="prof-xp-gm">0 XP</span>
+      </div>
+      <div class="xp-source-row">
+        <span class="xp-source-icon">&#127919;</span>
+        <span class="xp-source-name">Pic-Man</span>
+        <span class="xp-source-val" id="prof-xp-pacman">0 XP</span>
+      </div>
+      <div class="xp-source-row">
+        <span class="xp-source-icon">&#127922;</span>
+        <span class="xp-source-name">Zar Oyunu</span>
+        <span class="xp-source-val" id="prof-xp-dice">0 XP</span>
+      </div>
+      <div class="xp-source-row">
+        <span class="xp-source-icon">&#127905;</span>
+        <span class="xp-source-name">Sanli Cark</span>
+        <span class="xp-source-val" id="prof-xp-wheel">0 XP</span>
+      </div>
+      <div class="xp-source-row">
+        <span class="xp-source-icon">&#127921;</span>
+        <span class="xp-source-name">Sayi Oyunu</span>
+        <span class="xp-source-val" id="prof-xp-number">0 XP</span>
+      </div>
+      <div class="xp-total-row">
+        <span>Toplam XP</span>
+        <span class="xp-total-val" id="prof-xp-total">0 XP</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Rozetler</div>
+      <div class="badge-row" id="prof-badges">
+        <span class="badge" style="opacity:.35">&#128293; Ilk Check-in</span>
+        <span class="badge" style="opacity:.35">&#9728; GM Ustasi</span>
+        <span class="badge" style="opacity:.35">&#127919; Pic-Man</span>
+        <span class="badge" style="opacity:.35">&#127922; Zarci</span>
+        <span class="badge" style="opacity:.35">&#127905; Cark Ustasi</span>
+        <span class="badge" style="opacity:.35">&#127921; Sayi Ustasi</span>
+        <span class="badge" style="opacity:.35">&#129356; Gumus</span>
+        <span class="badge" style="opacity:.35">&#129357; Altin</span>
+        <span class="badge" style="opacity:.35">&#128142; Platin</span>
+        <span class="badge" style="opacity:.35">&#128081; Elmas</span>
+      </div>
+      <p style="font-size:11px;color:var(--tx2);margin-top:12px">Rozetler kazanildikca aktif hale gelir.</p>
+    </div>
+  </div>
+
   <!-- PANE: ADMIN -->
   <div class="pane" id="pane-admin">
     <div class="card">
@@ -528,7 +603,7 @@ var MAZE=[
 var PM={
   C:14, COLS:20, ROWS:20, TUNNEL_ROW:10,
   animId:null, running:false, started:false, gameOver:false,
-  level:1, score:0, lives:3, xpEarned:0,
+  level:1, score:0, lives:3, xpEarned:0, // localStorage'dan yüklenir
   col:10, row:16, prevCol:10, prevRow:16,
   dx:0, dy:0,
   ndx:0, ndy:0,       // buffered direction request
@@ -617,10 +692,10 @@ function pmTickPac(){
       if(PM.col<0){ PM.col=PM.COLS-1; PM.prevCol=PM.COLS-1; }
       if(PM.col>=PM.COLS){ PM.col=0; PM.prevCol=0; }
     } else {
-      // Duvara çarptı: Pac-Man durur ama yön korunur
-      // ndxTtl'i sıfırla ki mevcut yön isteği (ndx/ndy) yeniden denensin
-      // dx/dy'i KORUYORUZ — böylece dönüş noktasına gelince otomatik devam eder
-      // Sadece hareket etmiyoruz, yön hafızası var
+      // Duvara çarptı: tamamen dur
+      // Kullanıcı yeni yön verene kadar hareketsiz kal
+      PM.dx = 0; PM.dy = 0;
+      PM.ndx = 0; PM.ndy = 0; PM.ndxTtl = 0;
     }
   }
   pmEatPellet();
@@ -835,6 +910,7 @@ function pmLevelComplete(){
   if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
   var xp=PM.level*15+Math.floor(PM.score/10);
   PM.xpEarned+=xp;
+  saveXP('pacman', PM.xpEarned); // kalıcı kaydet
   document.getElementById('pm-xp-earned').textContent=PM.xpEarned;
   showToast('Seviye '+PM.level+' tamam! +'+xp+' XP');
 
@@ -873,11 +949,12 @@ function pmStartOrRestart(){
 
   if(!isLevelComplete){
     // Yeni oyun: her şeyi sıfırla
-    PM.level=1; PM.score=0; PM.lives=3; PM.xpEarned=0;
+    PM.level=1; PM.score=0; PM.lives=3;
+    // xpEarned silinmez — localStorage'dan yüklenir, birikmeye devam eder
     PM.gameOver=false;
     document.getElementById('pm-score').textContent='0';
     document.getElementById('pm-level').textContent='1 / 21';
-    document.getElementById('pm-xp-earned').textContent='0';
+    document.getElementById('pm-xp-earned').textContent=PM.xpEarned;
     document.getElementById('pm-sts').className='sts';
     pmUpdateLives();
   }
@@ -904,6 +981,30 @@ document.addEventListener('keydown',function(e){
   if(map[e.key]){ e.preventDefault(); pmDir(map[e.key][0],map[e.key][1]); }
   if(e.key===' '||e.key==='Enter') pmStartOrRestart();
 });
+
+// ─── KALICI XP DEPOLAMA (localStorage) ──────────────────────────────────────
+// Her XP kaynağı ayrı ayrı saklanır.
+// Anahtar: basefun_xp_{address}_{source}
+// Kaynaklar: pacman, number (on-chain olanlar kontrat üzerinden gelir)
+
+function xpKey(source) {
+  var addr = acct ? acct.toLowerCase() : 'guest';
+  return 'basefun_xp_' + addr + '_' + source;
+}
+
+function saveXP(source, val) {
+  try { localStorage.setItem(xpKey(source), String(val)); } catch(e){}
+}
+
+function loadXP(source) {
+  try { return parseInt(localStorage.getItem(xpKey(source)) || '0') || 0; } catch(e){ return 0; }
+}
+
+function loadAllLocalXP() {
+  PM.xpEarned = loadXP('pacman');
+  NG.localXP  = loadXP('number');
+  document.getElementById('pm-xp-earned').textContent = PM.xpEarned;
+}
 
 // ─── FARCASTER SDK ───────────────────────────────────────────────────────────
 async function initFarcasterSDK(){
@@ -985,6 +1086,7 @@ function updateUIConnected(){
   document.getElementById('wlt-adr').textContent=acct.slice(0,6)+'...'+acct.slice(-4);
   var btn=document.getElementById('con-btn'); btn.textContent='Baglantıyı Kes'; btn.classList.add('off');
   if(acct.toLowerCase()===ADMIN_ADDRESS.toLowerCase()){document.getElementById('tab-admin').classList.add('show');updateAdminStats();}
+  loadAllLocalXP(); // cüzdan adresi belli oldu, adrese özel XP'leri yükle
   updateAllStats();
 }
 function disconnect(){localStorage.removeItem('lastWallet');window.location.reload();}
@@ -1075,6 +1177,9 @@ async function updateAllStats(){
     else{var hh=Math.floor(diffSec/3600),mm=Math.floor((diffSec%3600)/60);statusTxt=hh+'s '+mm+'dk sonra (00:00 TR)';}
     document.getElementById('ck-status').textContent=statusTxt;
     document.getElementById('ck-btn').disabled=!canCk;
+
+    // Profil güncelle
+    updateProfile(checkInXP, Number(wS[0]||0n), Number(dS[0]||0n), totalXP);
   }catch(e){}
 }
 
@@ -1195,9 +1300,9 @@ async function spinWheel(){
 
 // ─── SAYI TAHMIN OYUNU ──────────────────────────────────────────────────────
 var NG = {
-  selected: null,   // kullanıcının seçtiği sayı
+  selected: null,
   spinning: false,
-  localXP: 0        // bu oturumda kazanılan XP
+  localXP: 0   // localStorage'dan yüklenir
 };
 
 function ngInit() {
@@ -1324,6 +1429,7 @@ function ngShowResult(result, selected) {
   var xp = isWin ? 100 : selected;
 
   NG.localXP += xp;
+  saveXP('number', NG.localXP); // kalıcı kaydet
   NG.spinning = false;
 
   var circle = document.getElementById('ng-circle');
@@ -1375,6 +1481,7 @@ function switchTab(n){
   document.getElementById('tab-'+n).classList.add('on');
   document.getElementById('pane-'+n).classList.add('on');
   if(n==='games'){ drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); if(!PM.started) pmDraw(1); }
+  if(n==='profile'){ updateAllStats(); }
 }
 
 function switchSubTab(n){
@@ -1421,6 +1528,48 @@ function setXPWidget(totalXP) {
   wv.textContent = totalXP.toLocaleString('tr-TR') + ' XP';
 }
 
+function updateProfile(ckXP, wheelXP, diceXP, totalXP) {
+  // Adres
+  var addrEl = document.getElementById('prof-addr');
+  if (addrEl) addrEl.textContent = acct ? (acct.slice(0,8)+'...'+acct.slice(-6)) : 'Cuzdan baglanmadi';
+
+  // Seviye badge
+  var lvlEl = document.getElementById('prof-level');
+  if (lvlEl) lvlEl.innerHTML = getLevel(totalXP);
+
+  // XP kaynakları
+  var gmXP = 0; // GM/GN on-chain XP yok (sadece mesaj gönderme)
+  var fmt = function(v){ return v.toLocaleString('tr-TR') + ' XP'; };
+  var el;
+  el = document.getElementById('prof-xp-checkin'); if(el) el.textContent = fmt(ckXP);
+  el = document.getElementById('prof-xp-gm');      if(el) el.textContent = fmt(gmXP);
+  el = document.getElementById('prof-xp-dice');    if(el) el.textContent = fmt(diceXP);
+  el = document.getElementById('prof-xp-wheel');   if(el) el.textContent = fmt(wheelXP);
+  el = document.getElementById('prof-xp-pacman');  if(el) el.textContent = fmt(PM.xpEarned);
+  el = document.getElementById('prof-xp-number');  if(el) el.textContent = fmt(NG.localXP);
+  el = document.getElementById('prof-xp-total');   if(el) el.textContent = fmt(totalXP);
+
+  // Rozetler
+  var badges = [
+    { id:0, earned: ckXP > 0,         label:'&#128293; Ilk Check-in' },
+    { id:1, earned: false,             label:'&#9728; GM Ustasi' },
+    { id:2, earned: PM.xpEarned > 0,  label:'&#127919; Pic-Man' },
+    { id:3, earned: diceXP > 0,       label:'&#127922; Zarci' },
+    { id:4, earned: wheelXP > 0,      label:'&#127905; Cark Ustasi' },
+    { id:5, earned: NG.localXP > 0,   label:'&#127921; Sayi Ustasi' },
+    { id:6, earned: totalXP >= 1000,  label:'&#129356; Gumus' },
+    { id:7, earned: totalXP >= 5000,  label:'&#129357; Altin' },
+    { id:8, earned: totalXP >= 10000, label:'&#128142; Platin' },
+    { id:9, earned: totalXP >= 50000, label:'&#128081; Elmas' }
+  ];
+  var badgeRow = document.getElementById('prof-badges');
+  if (badgeRow) {
+    badgeRow.innerHTML = badges.map(function(b){
+      return '<span class="badge" style="'+(b.earned?'background:var(--blue-light);color:var(--blue);border-color:var(--blue)':'opacity:.35')+'">'+b.label+'</span>';
+    }).join('');
+  }
+}
+
 function setSts(id,type,html){
   var el=document.getElementById(id);
   el.className='sts on '+type;
@@ -1439,6 +1588,8 @@ window.onload=async function(){
   drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1);
   // Sayi oyunu grid'i önceden oluştur
   setTimeout(ngInit, 300);
+  // localStorage'dan kalıcı XP'leri yükle
+  loadAllLocalXP();
   drawWheel(0);
   pmInit(); pmDraw(1);
   await initFarcasterSDK();
