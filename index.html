@@ -190,6 +190,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:.5px solid var(--bdr);background:var(--bg2)}
 
+/* SON İŞLEMLER */
+.tx-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid var(--bdr)}
+.tx-row:last-of-type{border-bottom:none}
+.tx-icon{width:32px;height:32px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.tx-info{flex:1;min-width:0}
+.tx-title{font-size:13px;font-weight:600;color:var(--tx)}
+.tx-time{font-size:11px;color:var(--tx2);margin-top:2px}
+.tx-xp{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0}
+
 /* XP WIDGET - sabit konum */
 #xp-widget{
   position:fixed;top:58px;right:12px;z-index:1000;
@@ -513,6 +522,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
       </div>
       <p style="font-size:11px;color:var(--tx2);margin-top:12px">Rozetler kazanildikca aktif hale gelir.</p>
     </div>
+    <div class="card">
+      <div class="ctitle">Son 10 Islem</div>
+      <div id="prof-tx-list">
+        <div style="text-align:center;color:var(--tx2);font-size:13px;padding:20px 0">Henuz islem yok</div>
+      </div>
+    </div>
   </div>
 
   <!-- PANE: ADMIN -->
@@ -569,13 +584,11 @@ var acct=null,prov=null,sgn=null,rawProv=null;
 var wheelAngle=0,wlts={},toastTimer=null,isFrameEnv=false;
 
 // ─── PAC-MAN OYUNU ───────────────────────────────────────────────────────────
-// v4 - Tüm bilinen sorunlar düzeltildi:
-// • Yön buffering: ndx/ndy 5 tick boyunca saklanır, ilk geçerli anda uygulanır
-// • Tunnel: sadece doğru satırda çalışır
-// • Hayalet smooth: acc sıfırlanır, lerp [0,1] aralığında kalır
-// • sTimer: dt bazlı azalır (tick sayısına değil)
-// • Duvara çarpınca dur ama ndx/ndy korunur (dönüş noktası beklenir)
-// • pmDraw her zaman çağrılır (invincible sadece rengi etkiler)
+// v5 - Temiz duvar mantığı:
+// Pac-Man bir yöne gider, o yönde duvar varsa DURUR.
+// Kullanıcı yön verene kadar HİÇ hareket etmez.
+// Yön verilince: o yön geçerliyse hemen hareket eder.
+// Yön buffer: köşe dönüşleri için birkaç tick önceden girilebilir.
 
 var MAZE=[
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -603,11 +616,12 @@ var MAZE=[
 var PM={
   C:14, COLS:20, ROWS:20, TUNNEL_ROW:10,
   animId:null, running:false, started:false, gameOver:false,
-  level:1, score:0, lives:3, xpEarned:0, // localStorage'dan yüklenir
+  level:1, score:0, lives:3, xpEarned:0,
   col:10, row:16, prevCol:10, prevRow:16,
-  dx:0, dy:0,
-  ndx:0, ndy:0,       // buffered direction request
-  ndxTtl:0,           // buffer kalan tick sayısı
+  dx:0, dy:0,       // mevcut yön (0,0 = dur)
+  faceDx:1, faceDy:0, // son hareket yönü — ağız bu yöne bakar
+  qx:0, qy:0,       // kullanıcının sıradaki istediği yön (queue)
+  qttl:0,           // queue geçerliliği (tick sayısı)
   TICK:160, acc:0, lastTs:0,
   mouth:0.05, mouthDir:1,
   map:[], pellets:[],
@@ -617,12 +631,8 @@ var PM={
 };
 
 function pmIsWall(r,c){
-  // Tunnel sadece TUNNEL_ROW'da çalışır
-  if(r===PM.TUNNEL_ROW){
-    if(c<0||c>=PM.COLS) return false;
-  } else {
-    if(c<0||c>=PM.COLS) return true;
-  }
+  if(r===PM.TUNNEL_ROW){ if(c<0||c>=PM.COLS) return false; }
+  else { if(c<0||c>=PM.COLS) return true; }
   if(r<0||r>=PM.ROWS) return true;
   return PM.map[r][c]===1;
 }
@@ -640,11 +650,11 @@ function pmInit(){
     }
   }
   PM.col=10; PM.row=16; PM.prevCol=10; PM.prevRow=16;
-  PM.dx=0; PM.dy=0; PM.ndx=0; PM.ndy=0; PM.ndxTtl=0;
+  PM.dx=0; PM.dy=0; PM.faceDx=1; PM.faceDy=0; PM.qx=0; PM.qy=0; PM.qttl=0;
   PM.acc=0; PM.invincible=0;
   PM.mouth=0.05; PM.mouthDir=1;
-  PM.TICK=Math.max(55,160-PM.level*5);
-  var gT=Math.max(70,210-PM.level*7);
+  PM.TICK=Math.max(60,160-PM.level*5);
+  var gT=Math.max(80,210-PM.level*7);
   PM.ghosts=[
     {col:8, row:9,  prevC:8, prevR:9,  dx:1, dy:0, lastDx:1, lastDy:0, acc:0, tick:gT,    color:'#FF0000', scared:false, sTimer:0, eaten:false},
     {col:11,row:9,  prevC:11,prevR:9,  dx:-1,dy:0, lastDx:-1,lastDy:0, acc:0, tick:gT+20, color:'#FFB8FF', scared:false, sTimer:0, eaten:false},
@@ -672,45 +682,44 @@ function pmEatPellet(){
 }
 
 function pmTickPac(){
-  // Yön buffering: birkaç tick boyunca dene
-  if(PM.ndxTtl>0){
-    if(!pmIsWall(PM.row+PM.ndy, PM.col+PM.ndx)){
-      PM.dx=PM.ndx; PM.dy=PM.ndy;
-      PM.ndx=0; PM.ndy=0; PM.ndxTtl=0;
+  // 1. Kullanıcının yön isteğini (qx/qy) kontrol et
+  //    Geçerliyse dx/dy'ye uygula, değilse qttl sayacını azalt
+  if(PM.qttl > 0){
+    if(!pmIsWall(PM.row + PM.qy, PM.col + PM.qx)){
+      PM.dx = PM.qx; PM.dy = PM.qy;
+      PM.qx = 0; PM.qy = 0; PM.qttl = 0;
     } else {
-      PM.ndxTtl--;
-      if(PM.ndxTtl===0){ PM.ndx=0; PM.ndy=0; }
+      PM.qttl--;
+      if(PM.qttl === 0){ PM.qx = 0; PM.qy = 0; }
     }
   }
-  // Mevcut yönde ilerle
-  if(PM.dx!==0||PM.dy!==0){
-    var nc=PM.col+PM.dx, nr=PM.row+PM.dy;
-    if(!pmIsWall(nr,nc)){
-      PM.prevCol=PM.col; PM.prevRow=PM.row;
-      PM.col=nc; PM.row=nr;
-      // Tunnel wrap
-      if(PM.col<0){ PM.col=PM.COLS-1; PM.prevCol=PM.COLS-1; }
-      if(PM.col>=PM.COLS){ PM.col=0; PM.prevCol=0; }
-    } else {
-      // Duvara çarptı: tamamen dur
-      // Kullanıcı yeni yön verene kadar hareketsiz kal
-      PM.dx = 0; PM.dy = 0;
-      PM.ndx = 0; PM.ndy = 0; PM.ndxTtl = 0;
-    }
+
+  // 2. Hareket: dx=dy=0 ise durmuş, hareket etme
+  if(PM.dx === 0 && PM.dy === 0) return;
+
+  var nc = PM.col + PM.dx;
+  var nr = PM.row + PM.dy;
+  if(!pmIsWall(nr, nc)){
+    // Önü açık: bir tile ilerle
+    PM.prevCol = PM.col; PM.prevRow = PM.row;
+    PM.col = nc; PM.row = nr;
+    PM.faceDx = PM.dx; PM.faceDy = PM.dy; // son yönü sakla
+    if(PM.col < 0){ PM.col = PM.COLS-1; PM.prevCol = PM.COLS-1; }
+    if(PM.col >= PM.COLS){ PM.col = 0; PM.prevCol = 0; }
+    pmEatPellet();
+  } else {
+    // Önde DUVAR: dx=dy=0 yap → tamamen dur
+    // Pac-Man tile merkezinde kalır, kullanıcı yön verene kadar bekler
+    PM.dx = 0; PM.dy = 0;
   }
-  pmEatPellet();
 }
 
-function pmTickGhost(g, dt){
-  // sTimer dt bazlı azalır
-  if(g.scared){
-    g.sTimer-=dt;
-    if(g.sTimer<=0){ g.scared=false; g.sTimer=0; }
-  }
+function pmTickGhost(g,dt){
+  if(g.scared){ g.sTimer-=dt; if(g.sTimer<=0){g.scared=false;g.sTimer=0;} }
   var DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
   var possible=DIRS.filter(function(d){
     if(d[0]===-g.lastDx&&d[1]===-g.lastDy) return false;
-    return !pmIsWall(g.row+d[1], g.col+d[0]);
+    return !pmIsWall(g.row+d[1],g.col+d[0]);
   });
   if(possible.length===0) possible=[[-g.lastDx,-g.lastDy]];
   var chosen=possible[Math.floor(Math.random()*possible.length)];
@@ -720,7 +729,7 @@ function pmTickGhost(g, dt){
     g.col=nc; g.row=nr;
     g.lastDx=chosen[0]; g.lastDy=chosen[1];
     g.dx=chosen[0]; g.dy=chosen[1];
-    g.acc=0; // acc sıfırla — yeni tile başlangıcı
+    g.acc=0;
   }
 }
 
@@ -738,8 +747,7 @@ function pmCheckCollision(){
         (function(ghost){
           setTimeout(function(){
             ghost.col=9; ghost.row=9; ghost.prevC=9; ghost.prevR=9;
-            ghost.lastDx=1; ghost.lastDy=0; ghost.acc=0;
-            ghost.eaten=false;
+            ghost.lastDx=1; ghost.lastDy=0; ghost.acc=0; ghost.eaten=false;
           },3000);
         })(g);
       } else {
@@ -756,13 +764,13 @@ function pmCheckCollision(){
 
 function pmResetPositions(){
   PM.col=10; PM.row=16; PM.prevCol=10; PM.prevRow=16;
-  PM.dx=0; PM.dy=0; PM.ndx=0; PM.ndy=0; PM.ndxTtl=0; PM.acc=0;
+  PM.dx=0; PM.dy=0; PM.qx=0; PM.qy=0; PM.qttl=0; PM.acc=0;
   var gs=[[8,9],[11,9],[8,11],[11,11]];
   for(var i=0;i<PM.ghosts.length;i++){
     PM.ghosts[i].col=gs[i][1]; PM.ghosts[i].row=gs[i][0];
     PM.ghosts[i].prevC=gs[i][1]; PM.ghosts[i].prevR=gs[i][0];
-    PM.ghosts[i].acc=0;
-    PM.ghosts[i].scared=false; PM.ghosts[i].sTimer=0; PM.ghosts[i].eaten=false;
+    PM.ghosts[i].acc=0; PM.ghosts[i].scared=false;
+    PM.ghosts[i].sTimer=0; PM.ghosts[i].eaten=false;
   }
 }
 
@@ -771,9 +779,7 @@ function pmDraw(t){
   if(!cv) return;
   var ctx=cv.getContext('2d');
   var C=PM.C;
-  ctx.fillStyle='#000';
-  ctx.fillRect(0,0,cv.width,cv.height);
-
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,cv.width,cv.height);
   // Duvarlar
   for(var r=0;r<PM.ROWS;r++){
     for(var c=0;c<PM.COLS;c++){
@@ -785,54 +791,40 @@ function pmDraw(t){
       }
     }
   }
-
   // Pelletler
   for(var i=0;i<PM.pellets.length;i++){
-    var p=PM.pellets[i];
-    if(p.eaten) continue;
+    var p=PM.pellets[i]; if(p.eaten) continue;
     ctx.beginPath();
-    if(p.power){
-      ctx.fillStyle='#FFB852';
-      ctx.arc(p.c*C+C/2,p.r*C+C/2,4,0,Math.PI*2);
-    } else {
-      ctx.fillStyle='#ddc890';
-      ctx.arc(p.c*C+C/2,p.r*C+C/2,2,0,Math.PI*2);
-    }
+    if(p.power){ ctx.fillStyle='#FFB852'; ctx.arc(p.c*C+C/2,p.r*C+C/2,4,0,Math.PI*2); }
+    else { ctx.fillStyle='#ddc890'; ctx.arc(p.c*C+C/2,p.r*C+C/2,2,0,Math.PI*2); }
     ctx.fill();
   }
-
-  // Pac-Man smooth pozisyon
-  var lerp=Math.min(Math.max(t,0),1);
+  // Pac-Man
+  // Duruyorsa (dx=dy=0) t=1 kullan — önceki tile'da sabit dur
+  var lerp = (PM.dx===0&&PM.dy===0) ? 1 : Math.min(Math.max(t,0),1);
   var px=(PM.prevCol+(PM.col-PM.prevCol)*lerp)*C+C/2;
   var py=(PM.prevRow+(PM.row-PM.prevRow)*lerp)*C+C/2;
-
-  // Dokunulmazlık: 150ms'de bir yanıp söner
   var hide=PM.invincible>0&&Math.floor(PM.lastTs/150)%2===1;
   if(!hide){
     PM.mouth+=PM.mouthDir*0.12;
     if(PM.mouth>0.27) PM.mouthDir=-1;
     if(PM.mouth<0.02) PM.mouthDir=1;
-    var angle=Math.atan2(PM.dy,PM.dx);
+    var angle=Math.atan2(PM.faceDy,PM.faceDx); // duruyorsa son yöne bak
     ctx.beginPath();
     ctx.moveTo(px,py);
     ctx.arc(px,py,C/2-1,angle+PM.mouth*Math.PI,angle+(2-PM.mouth)*Math.PI);
     ctx.closePath();
-    ctx.fillStyle='#FFE000';
-    ctx.fill();
+    ctx.fillStyle='#FFE000'; ctx.fill();
   }
-
   // Hayaletler
   for(var gi=0;gi<PM.ghosts.length;gi++){
-    var g=PM.ghosts[gi];
-    if(g.eaten) continue;
-    // Smooth: acc/tick [0,1] — acc tile geçişinde sıfırlandı
+    var g=PM.ghosts[gi]; if(g.eaten) continue;
     var gt=Math.min(Math.max(g.acc/g.tick,0),1);
     var gx=(g.prevC+(g.col-g.prevC)*gt)*C+C/2;
     var gy=(g.prevR+(g.row-g.prevR)*gt)*C+C/2;
     var gr=C/2-1;
     var flash=g.scared&&g.sTimer<2000&&Math.floor(PM.lastTs/200)%2===0;
     var gc=g.scared?(flash?'#ffffff':'#0000cc'):g.color;
-    // Vücut
     ctx.beginPath();
     ctx.arc(gx,gy-gr*0.25,gr,Math.PI,0);
     ctx.lineTo(gx+gr,gy+gr*0.75);
@@ -862,39 +854,30 @@ function pmLoop(ts){
   if(!PM.running) return;
   var dt=Math.min(ts-PM.lastTs,50);
   PM.lastTs=ts;
-
-  // Dokunulmazlık sayacı
   if(PM.invincible>0) PM.invincible=Math.max(0,PM.invincible-dt);
-
-  // Pac-Man tick
+  // Pac-Man tick — sadece BİR tick per frame (while yerine if)
   PM.acc+=dt;
-  while(PM.acc>=PM.TICK){
+  if(PM.acc>=PM.TICK){
     PM.acc-=PM.TICK;
     pmTickPac();
     if(PM.eaten>=PM.totalPellets){ pmLevelComplete(); return; }
   }
-
-  // Hayalet tick — dt'yi geçir
+  // Hayalet tick
   for(var i=0;i<PM.ghosts.length;i++){
-    var g=PM.ghosts[i];
-    if(g.eaten) continue;
+    var g=PM.ghosts[i]; if(g.eaten) continue;
     g.acc+=dt;
-    while(g.acc>=g.tick){
+    if(g.acc>=g.tick){
       g.acc-=g.tick;
-      pmTickGhost(g, g.tick); // dt olarak tick kullan
+      pmTickGhost(g,g.tick);
     }
   }
-
-  // Çarpışma
   if(pmCheckCollision()) return;
-
   pmDraw(PM.acc/PM.TICK);
   PM.animId=requestAnimationFrame(pmLoop);
 }
 
 function pmUpdateLives(){
-  var h='';
-  for(var i=0;i<PM.lives;i++) h+='&#128993;';
+  var h=''; for(var i=0;i<PM.lives;i++) h+='&#128993;';
   document.getElementById('pm-lives').innerHTML=h;
 }
 
@@ -910,25 +893,21 @@ function pmLevelComplete(){
   if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
   var xp=PM.level*15+Math.floor(PM.score/10);
   PM.xpEarned+=xp;
-  saveXP('pacman', PM.xpEarned); // kalıcı kaydet
+  saveXP('pacman',PM.xpEarned);
   document.getElementById('pm-xp-earned').textContent=PM.xpEarned;
   showToast('Seviye '+PM.level+' tamam! +'+xp+' XP');
-
-  // XP widget'ı animasyonlu güncelle + ana XP sayacını güncelle
+  addTx('&#127919;','Pic-Man Seviye '+PM.level+' Tamamlandi',xp);
   updateXPWidget(xp);
-  setTimeout(function(){ updateAllStats(); }, 1000);
-
+  setTimeout(function(){ updateAllStats(); },1000);
   if(PM.level>=21){
     pmShowMsg('TEBRIKLER!','Tum 21 seviye tamamlandi!');
     setSts('pm-sts','ok','Harika! Toplam '+PM.xpEarned+' XP!');
-    PM.gameOver=true;
-    pmDraw(1);
-    return;
+    PM.gameOver=true; pmDraw(1); return;
   }
   PM.level++;
   document.getElementById('pm-level').textContent=PM.level+' / 21';
   pmShowMsg('SEVIYE '+(PM.level-1)+' TAMAM!','+'+xp+' XP — Devam icin ► bas');
-  pmDraw(1); // Son frame'i göster
+  pmDraw(1);
 }
 
 function pmGameOver(){
@@ -942,15 +921,9 @@ function pmGameOver(){
 
 function pmStartOrRestart(){
   if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
-
-  // Eğer oyun bittiyse (game over veya hiç başlamadıysa) → tamamen sıfırla
-  // Eğer seviye tamamlandıysa (gameOver=false, started=true, running=false) → sonraki seviyeye geç
-  var isLevelComplete = PM.started && !PM.running && !PM.gameOver;
-
+  var isLevelComplete=PM.started&&!PM.running&&!PM.gameOver;
   if(!isLevelComplete){
-    // Yeni oyun: her şeyi sıfırla
     PM.level=1; PM.score=0; PM.lives=3;
-    // xpEarned silinmez — localStorage'dan yüklenir, birikmeye devam eder
     PM.gameOver=false;
     document.getElementById('pm-score').textContent='0';
     document.getElementById('pm-level').textContent='1 / 21';
@@ -958,7 +931,6 @@ function pmStartOrRestart(){
     document.getElementById('pm-sts').className='sts';
     pmUpdateLives();
   }
-  // Her iki durumda da: haritayı yükle, başlat
   PM.started=true; PM.running=false;
   pmInit();
   pmHideMsg();
@@ -971,8 +943,16 @@ function pmStartOrRestart(){
 }
 
 function pmDir(dx,dy){
-  PM.ndx=dx; PM.ndy=dy;
-  PM.ndxTtl=5; // 5 tick boyunca dene
+  // Kullanıcı yön verdi — her zaman queue'ya yaz
+  PM.qx = dx; PM.qy = dy;
+  PM.qttl = 4; // 4 tick boyunca dene
+  // Pac-Man duruyorsa (dx=dy=0) ve istenen yön geçerliyse anında başlat
+  if(PM.dx === 0 && PM.dy === 0){
+    if(!pmIsWall(PM.row + dy, PM.col + dx)){
+      PM.dx = dx; PM.dy = dy;
+      PM.qx = 0; PM.qy = 0; PM.qttl = 0;
+    }
+  }
 }
 
 document.addEventListener('keydown',function(e){
@@ -1004,6 +984,61 @@ function loadAllLocalXP() {
   PM.xpEarned = loadXP('pacman');
   NG.localXP  = loadXP('number');
   document.getElementById('pm-xp-earned').textContent = PM.xpEarned;
+}
+
+// ─── İŞLEM GEÇMİŞİ ──────────────────────────────────────────────────────────
+// Son 10 işlem localStorage'da saklanır.
+// Her işlem: { icon, title, xp, time (ISO string) }
+
+function txKey(){
+  var addr = acct ? acct.toLowerCase() : 'guest';
+  return 'basefun_tx_' + addr;
+}
+
+function loadTxHistory(){
+  try {
+    return JSON.parse(localStorage.getItem(txKey()) || '[]');
+  } catch(e){ return []; }
+}
+
+function saveTxHistory(list){
+  try { localStorage.setItem(txKey(), JSON.stringify(list.slice(0,10))); } catch(e){}
+}
+
+function addTx(icon, title, xp){
+  var list = loadTxHistory();
+  list.unshift({
+    icon: icon,
+    title: title,
+    xp: xp,
+    time: new Date().toISOString()
+  });
+  saveTxHistory(list);
+  renderTxHistory();
+}
+
+function renderTxHistory(){
+  var el = document.getElementById('prof-tx-list');
+  if(!el) return;
+  var list = loadTxHistory();
+  if(list.length === 0){
+    el.innerHTML = '<div style="text-align:center;color:var(--tx2);font-size:13px;padding:20px 0">Henuz islem yok</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(tx){
+    var d = new Date(tx.time);
+    var dateStr = d.toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric'});
+    var timeStr = d.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
+    var xpStr = tx.xp > 0 ? ('+' + tx.xp + ' XP') : '';
+    return '<div class="tx-row">'
+      + '<div class="tx-icon">' + tx.icon + '</div>'
+      + '<div class="tx-info">'
+      + '<div class="tx-title">' + tx.title + '</div>'
+      + '<div class="tx-time">' + dateStr + ' ' + timeStr + '</div>'
+      + '</div>'
+      + (xpStr ? '<div class="tx-xp">' + xpStr + '</div>' : '')
+      + '</div>';
+  }).join('');
 }
 
 // ─── FARCASTER SDK ───────────────────────────────────────────────────────────
@@ -1194,6 +1229,7 @@ async function doCheckIn(){
     await tx.wait();
     setSts('ck-sts','ok','Check-in basarili! +10 XP kazandin.');
     showToast('Check-in tamamlandi! +10 XP');
+    addTx('&#128197;', 'Check-in', 10);
     updateAllStats();
   }catch(e){
     var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'Hata').slice(0,80);
@@ -1212,6 +1248,7 @@ async function sendMsg(t){
     await tx.wait();
     setSts(t+'-sts','ok',(t==='gm'?'GM':'GN')+' gonderildi!');
     showToast(t==='gm'?'Good Morning!':'Good Night!');
+    addTx(t==='gm'?'&#9728;':'&#127769;', t==='gm'?'GM Gonderildi':'GN Gonderildi', 0);
   }catch(e){
     var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
     setSts(t+'-sts','err','Hata: '+msg);
@@ -1242,6 +1279,7 @@ async function rollDice(){
     document.getElementById('dice-res').textContent=d1+' + '+d2+' = '+(d1+d2)+(isDouble?' DOUBLE!':'');
     setSts('roll-sts','ok',isDouble?'Cift! Bonus XP!':'Zar atildi!');
     if(isDouble) showToast('Cift! Bonus XP!');
+    addTx('&#127922;', isDouble?'Zar - DOUBLE!':'Zar Oyunu', isDouble?50:10);
     updateAllStats();
   }catch(e){
     var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
@@ -1288,7 +1326,7 @@ async function spinWheel(){
         var xp=SEGMENTS_XP[winIdx];
         document.getElementById('wheel-res').textContent='+'+xp+' XP kazandin!';
         setSts('wheel-sts','ok','Tebrikler! +'+xp+' XP!');
-        showToast('+'+xp+' XP!');btn.disabled=false;updateAllStats();
+        showToast('+'+xp+' XP!');addTx('&#127905;','Sanli Cark +'+xp+' XP',xp);btn.disabled=false;updateAllStats();
       }
     }
     requestAnimationFrame(anim);
@@ -1462,6 +1500,7 @@ function ngShowResult(result, selected) {
   }
 
   setSts('ng-sts', 'ok', 'Bu turda +' + xp + ' XP! Toplam bu oyundan: ' + NG.localXP + ' XP');
+  addTx('&#127921;', isWin?'Sayi Oyunu - SUPER! Tutturdu!':'Sayi Oyunu', xp);
 
   // XP widget - animasyonlu artış göster, sonra updateAllStats ile gerçek toplamı yaz
   updateXPWidget(xp);
@@ -1481,7 +1520,7 @@ function switchTab(n){
   document.getElementById('tab-'+n).classList.add('on');
   document.getElementById('pane-'+n).classList.add('on');
   if(n==='games'){ drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); if(!PM.started) pmDraw(1); }
-  if(n==='profile'){ updateAllStats(); }
+  if(n==='profile'){ updateAllStats(); renderTxHistory(); }
 }
 
 function switchSubTab(n){
@@ -1562,6 +1601,7 @@ function updateProfile(ckXP, wheelXP, diceXP, totalXP) {
     { id:8, earned: totalXP >= 10000, label:'&#128142; Platin' },
     { id:9, earned: totalXP >= 50000, label:'&#128081; Elmas' }
   ];
+  renderTxHistory();
   var badgeRow = document.getElementById('prof-badges');
   if (badgeRow) {
     badgeRow.innerHTML = badges.map(function(b){
