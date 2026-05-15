@@ -483,7 +483,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
         <span class="xp-source-val" id="prof-xp-gm">0 XP</span>
       </div>
       <div class="xp-source-row">
-        <span class="xp-source-icon">&#127919;</span>
+        <span class="xp-source-icon"><svg width="18" height="18" viewBox="0 0 18 18" style="vertical-align:middle"><circle cx="9" cy="9" r="9" fill="#FFE000"/><polygon points="9,9 18,5.5 18,12.5" fill="#05051a"/></svg></span>
         <span class="xp-source-name">Pic-Man</span>
         <span class="xp-source-val" id="prof-xp-pacman">0 XP</span>
       </div>
@@ -889,7 +889,7 @@ function pmDraw(t){
   var pacY=(PM.prevRow+(PM.row-PM.prevRow)*lerp)*C+C/2;
   var hide=PM.invincible>0&&Math.floor(PM.lastTs/150)%2===1;
   if(!hide){
-    PM.mouth+=PM.mouthDir*0.12;
+    PM.mouth+=PM.mouthDir*0.05;
     if(PM.mouth>0.27) PM.mouthDir=-1;
     if(PM.mouth<0.02) PM.mouthDir=1;
     var faceDx = (PM.dx!==0||PM.dy!==0) ? PM.dx : (PM.faceDx||1);
@@ -1336,7 +1336,7 @@ async function updateAllStats(){
     try{wS=await wc.getPlayerStats(acct);}catch(e){}
     try{dS=await dc.getPlayerStats(acct);}catch(e){}
     var checkInXP=Number(cRes[1]||0n)*10;
-    var totalXP=checkInXP+Number(wS[0]||0n)+Number(dS[0]||0n)+PM.xpEarned+NG.localXP;
+    var totalXP=checkInXP+Number(wS[0]||0n)+Number(dS[0]||0n)+PM.xpEarned+NG.localXP+loadXP("gm");
     document.getElementById('ck-streak').textContent=cRes[0].toString();
     document.getElementById('ck-total').textContent=totalXP.toLocaleString('tr-TR');
     // XP widget - tum kaynaklarin toplami
@@ -1361,7 +1361,7 @@ async function updateAllStats(){
     document.getElementById('ck-btn').disabled=!canCk;
 
     // Profil güncelle
-    updateProfile(checkInXP, Number(wS[0]||0n), Number(dS[0]||0n), totalXP);
+    updateProfile(checkInXP, Number(wS[0]||0n), Number(dS[0]||0n), totalXP, loadXP("gm"), NG.localXP);
   }catch(e){}
 }
 
@@ -1395,7 +1395,10 @@ async function sendMsg(t){
     await tx.wait();
     setSts(t+'-sts','ok',(t==='gm'?'GM':'GN')+' gonderildi!');
     showToast(t==='gm'?'Good Morning!':'Good Night!');
-    addTx(t==='gm'?'&#9728;':'&#127769;', t==='gm'?'GM Gonderildi':'GN Gonderildi', 0);
+    var gmXpEarned = 5; // GM/GN her gonderimde 5 XP
+    var newGmXP = loadXP('gm') + gmXpEarned;
+    saveXP('gm', newGmXP);
+    addTx(t==='gm'?'&#9728;':'&#127769;', t==='gm'?'GM Gonderildi':'GN Gonderildi', gmXpEarned);
   }catch(e){
     var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'').slice(0,80);
     setSts(t+'-sts','err','Hata: '+msg);
@@ -1667,7 +1670,7 @@ function switchTab(n){
   document.getElementById('tab-'+n).classList.add('on');
   document.getElementById('pane-'+n).classList.add('on');
   if(n==='games'){ drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); if(!PM.started) pmDraw(1); }
-  if(n==='profile'){ updateAllStats(); renderTxHistory(); }
+  if(n==='profile'){ updateAllStats(); renderTxHistory(); drawProfilePac(); }
 }
 
 function switchSubTab(n){
@@ -1683,6 +1686,25 @@ function switchSubTab(n){
 function openModal(){document.getElementById('modal-bg').classList.add('on');}
 function closeModal(){document.getElementById('modal-bg').classList.remove('on');}
 function handleModalBgClick(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+function drawProfilePac(){
+  var cv=document.getElementById('prof-pac-canvas');
+  if(!cv) return;
+  var ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,48,48);
+  var cx=24,cy=24,r=22;
+  var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  bg.addColorStop(0,'#1a1a3e'); bg.addColorStop(1,'#05051a');
+  ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  var grad=ctx.createRadialGradient(cx-6,cy-6,0,cx,cy,r-2);
+  grad.addColorStop(0,'#fff176'); grad.addColorStop(0.5,'#FFE000'); grad.addColorStop(1,'#f9a825');
+  ctx.save(); ctx.shadowColor='#ffe000'; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  ctx.arc(cx,cy,r-2,0.25*Math.PI,1.75*Math.PI); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill(); ctx.restore();
+  ctx.fillStyle='#1a1a2e';
+  ctx.beginPath(); ctx.arc(cx+4,cy-10,2.5,0,Math.PI*2); ctx.fill();
+}
 
 function updateXPWidget(addedXP) {
   // addedXP: sadece animasyon için kullanılır
@@ -1714,7 +1736,7 @@ function setXPWidget(totalXP) {
   wv.textContent = totalXP.toLocaleString('tr-TR') + ' XP';
 }
 
-function updateProfile(ckXP, wheelXP, diceXP, totalXP) {
+function updateProfile(ckXP, wheelXP, diceXP, totalXP, gmXP, numberXP) {
   // Adres
   var addrEl = document.getElementById('prof-addr');
   if (addrEl) addrEl.textContent = acct ? (acct.slice(0,8)+'...'+acct.slice(-6)) : 'Cuzdan baglanmadi';
@@ -1724,7 +1746,8 @@ function updateProfile(ckXP, wheelXP, diceXP, totalXP) {
   if (lvlEl) lvlEl.innerHTML = getLevel(totalXP);
 
   // XP kaynakları
-  var gmXP = 0; // GM/GN on-chain XP yok (sadece mesaj gönderme)
+  if(!gmXP) gmXP = 0;
+  if(!numberXP) numberXP = NG.localXP;
   var fmt = function(v){ return v.toLocaleString('tr-TR') + ' XP'; };
   var el;
   el = document.getElementById('prof-xp-checkin'); if(el) el.textContent = fmt(ckXP);
@@ -1732,7 +1755,7 @@ function updateProfile(ckXP, wheelXP, diceXP, totalXP) {
   el = document.getElementById('prof-xp-dice');    if(el) el.textContent = fmt(diceXP);
   el = document.getElementById('prof-xp-wheel');   if(el) el.textContent = fmt(wheelXP);
   el = document.getElementById('prof-xp-pacman');  if(el) el.textContent = fmt(PM.xpEarned);
-  el = document.getElementById('prof-xp-number');  if(el) el.textContent = fmt(NG.localXP);
+  el = document.getElementById('prof-xp-number');  if(el) el.textContent = fmt(numberXP);
   el = document.getElementById('prof-xp-total');   if(el) el.textContent = fmt(totalXP);
 
   // Rozetler
@@ -1749,6 +1772,7 @@ function updateProfile(ckXP, wheelXP, diceXP, totalXP) {
     { id:9, earned: totalXP >= 50000, label:'&#128081; Elmas' }
   ];
   renderTxHistory();
+  drawProfilePac();
   var badgeRow = document.getElementById('prof-badges');
   if (badgeRow) {
     badgeRow.innerHTML = badges.map(function(b){
