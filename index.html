@@ -138,13 +138,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .wheel-wrapper{position:relative;display:inline-block;margin-bottom:15px}
 .wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:24px;z-index:10}
 #wheel-cv{border-radius:50%;box-shadow:0 4px 24px rgba(0,0,0,.2)}
+#pm-canvas{display:block;margin:0 auto;border-radius:10px;border:2px solid #3a6fff;background:#05051a;max-width:100%;box-shadow:0 0 20px rgba(58,111,255,0.4),0 0 40px rgba(58,111,255,0.15)}
 .wheel-res{font-weight:700;font-size:18px;min-height:28px;margin-bottom:10px;font-family:'Space Mono',monospace;text-align:center}
 
 /* PAC-MAN */
 .pm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .pm-stat{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .pm-label{font-size:10px;color:var(--tx2);margin-bottom:2px}
-#pm-canvas{display:block;margin:0 auto;border-radius:8px;border:2px solid var(--bdr);background:#000;max-width:100%}
+
 .pm-dpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;max-width:180px;margin-left:auto;margin-right:auto}
 .pm-dpad button{padding:16px 0;border:none;border-radius:10px;background:var(--bg2);border:.5px solid var(--bdr);font-size:22px;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;user-select:none}
 .pm-dpad button:active{background:var(--blue);color:#fff;transform:scale(.92)}
@@ -342,7 +343,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
   <!-- PANE: GAMES -->
   <div class="pane" id="pane-games">
     <div class="sub-tabs">
-      <button class="sub-tab on" id="stab-pacman" onclick="switchSubTab('pacman')">&#127919; Pic-Man</button>
+      <button class="sub-tab on" id="stab-pacman" onclick="switchSubTab('pacman')"><svg width="14" height="14" viewBox="0 0 14 14" style="vertical-align:middle;margin-right:3px"><circle cx="7" cy="7" r="7" fill="#FFE000"/><polygon points="7,7 14,4 14,10" fill="#141413"/></svg>Pic-Man</button>
       <button class="sub-tab" id="stab-dice" onclick="switchSubTab('dice')">&#127922; Zar</button>
       <button class="sub-tab" id="stab-wheel" onclick="switchSubTab('wheel')">&#127905; Cark</button>
       <button class="sub-tab" id="stab-numgame" onclick="switchSubTab('numgame')">&#127921; Sayi</button>
@@ -779,73 +780,194 @@ function pmDraw(t){
   if(!cv) return;
   var ctx=cv.getContext('2d');
   var C=PM.C;
-  ctx.fillStyle='#000'; ctx.fillRect(0,0,cv.width,cv.height);
-  // Duvarlar
+  var W=cv.width, H=cv.height;
+
+  // ── ARKA PLAN ────────────────────────────────────────────────────────────
+  var bgGrad=ctx.createLinearGradient(0,0,W,H);
+  bgGrad.addColorStop(0,'#05051a');
+  bgGrad.addColorStop(1,'#0a0a2e');
+  ctx.fillStyle=bgGrad;
+  ctx.fillRect(0,0,W,H);
+
+  // ── DUVARLAR ─────────────────────────────────────────────────────────────
   for(var r=0;r<PM.ROWS;r++){
     for(var c=0;c<PM.COLS;c++){
-      if(PM.map[r][c]===1){
-        ctx.fillStyle='#1a4bcc';
-        ctx.fillRect(c*C,r*C,C,C);
-        ctx.strokeStyle='#2a65ff'; ctx.lineWidth=0.5;
-        ctx.strokeRect(c*C+0.5,r*C+0.5,C-1,C-1);
+      if(PM.map[r][c]!==1) continue;
+      var wx=c*C, wy=r*C;
+
+      // Duvar dolgu — koyu lacivert
+      ctx.fillStyle='#0d1b6e';
+      ctx.fillRect(wx,wy,C,C);
+
+      // Neon mavi kenar çizgisi (sadece koridor komşu olan kenarlara)
+      ctx.strokeStyle='#3a6fff';
+      ctx.lineWidth=1;
+      // Üst kenar
+      if(r===0||PM.map[r-1][c]!==1){
+        ctx.beginPath(); ctx.moveTo(wx,wy+0.5); ctx.lineTo(wx+C,wy+0.5); ctx.stroke();
       }
+      // Alt kenar
+      if(r===PM.ROWS-1||PM.map[r+1][c]!==1){
+        ctx.beginPath(); ctx.moveTo(wx,wy+C-0.5); ctx.lineTo(wx+C,wy+C-0.5); ctx.stroke();
+      }
+      // Sol kenar
+      if(c===0||PM.map[r][c-1]!==1){
+        ctx.beginPath(); ctx.moveTo(wx+0.5,wy); ctx.lineTo(wx+0.5,wy+C); ctx.stroke();
+      }
+      // Sağ kenar
+      if(c===PM.COLS-1||PM.map[r][c+1]!==1){
+        ctx.beginPath(); ctx.moveTo(wx+C-0.5,wy); ctx.lineTo(wx+C-0.5,wy+C); ctx.stroke();
+      }
+
+      // Neon glow — iç parlama
+      ctx.fillStyle='rgba(58,111,255,0.07)';
+      ctx.fillRect(wx+1,wy+1,C-2,C-2);
     }
   }
-  // Pelletler
-  for(var i=0;i<PM.pellets.length;i++){
-    var p=PM.pellets[i]; if(p.eaten) continue;
-    ctx.beginPath();
-    if(p.power){ ctx.fillStyle='#FFB852'; ctx.arc(p.c*C+C/2,p.r*C+C/2,4,0,Math.PI*2); }
-    else { ctx.fillStyle='#ddc890'; ctx.arc(p.c*C+C/2,p.r*C+C/2,2,0,Math.PI*2); }
-    ctx.fill();
+
+  // ── PELLETler ─────────────────────────────────────────────────────────────
+  for(var pi=0;pi<PM.pellets.length;pi++){
+    var p=PM.pellets[pi]; if(p.eaten) continue;
+    var px2=p.c*C+C/2, py2=p.r*C+C/2;
+    if(p.power){
+      // Power pellet: neon sarı, glow efekti
+      ctx.save();
+      ctx.shadowColor='#ffe000';
+      ctx.shadowBlur=8;
+      ctx.fillStyle='#ffe000';
+      ctx.beginPath();
+      ctx.arc(px2,py2,4,0,Math.PI*2);
+      ctx.fill();
+      // İç parlak nokta
+      ctx.shadowBlur=0;
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath();
+      ctx.arc(px2,py2,1.5,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      // Normal pellet: küçük parlak nokta
+      ctx.save();
+      ctx.shadowColor='rgba(200,200,255,0.6)';
+      ctx.shadowBlur=3;
+      ctx.fillStyle='#c8c8ff';
+      ctx.beginPath();
+      ctx.arc(px2,py2,2,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
-  // Pac-Man
-  // Duruyorsa (dx=dy=0) t=1 kullan — önceki tile'da sabit dur
-  var lerp = (PM.dx===0&&PM.dy===0) ? 1 : Math.min(Math.max(t,0),1);
-  var px=(PM.prevCol+(PM.col-PM.prevCol)*lerp)*C+C/2;
-  var py=(PM.prevRow+(PM.row-PM.prevRow)*lerp)*C+C/2;
+
+  // ── PAC-MAN ───────────────────────────────────────────────────────────────
+  var lerp=(PM.dx===0&&PM.dy===0)?1:Math.min(Math.max(t,0),1);
+  var pacX=(PM.prevCol+(PM.col-PM.prevCol)*lerp)*C+C/2;
+  var pacY=(PM.prevRow+(PM.row-PM.prevRow)*lerp)*C+C/2;
   var hide=PM.invincible>0&&Math.floor(PM.lastTs/150)%2===1;
   if(!hide){
     PM.mouth+=PM.mouthDir*0.12;
     if(PM.mouth>0.27) PM.mouthDir=-1;
     if(PM.mouth<0.02) PM.mouthDir=1;
-    var angle=Math.atan2(PM.faceDy,PM.faceDx); // duruyorsa son yöne bak
+    var faceDx = (PM.dx!==0||PM.dy!==0) ? PM.dx : (PM.faceDx||1);
+    var faceDy = (PM.dx!==0||PM.dy!==0) ? PM.dy : (PM.faceDy||0);
+    var angle=Math.atan2(faceDy,faceDx);
+    var R=C/2-0.5;
+
+    // Pac-Man glow
+    ctx.save();
+    ctx.shadowColor='#ffe000';
+    ctx.shadowBlur=10;
+
+    // Gradient fill
+    var pacGrad=ctx.createRadialGradient(pacX-R*0.3,pacY-R*0.3,0,pacX,pacY,R);
+    pacGrad.addColorStop(0,'#fff176');
+    pacGrad.addColorStop(0.5,'#FFE000');
+    pacGrad.addColorStop(1,'#f9a825');
+
     ctx.beginPath();
-    ctx.moveTo(px,py);
-    ctx.arc(px,py,C/2-1,angle+PM.mouth*Math.PI,angle+(2-PM.mouth)*Math.PI);
+    ctx.moveTo(pacX,pacY);
+    ctx.arc(pacX,pacY,R,angle+PM.mouth*Math.PI,angle+(2-PM.mouth)*Math.PI);
     ctx.closePath();
-    ctx.fillStyle='#FFE000'; ctx.fill();
+    ctx.fillStyle=pacGrad;
+    ctx.fill();
+    ctx.restore();
+
+    // Göz
+    var eyeAngle=angle-Math.PI*0.35;
+    var eyeX=pacX+Math.cos(eyeAngle)*R*0.55;
+    var eyeY=pacY+Math.sin(eyeAngle)*R*0.55;
+    ctx.fillStyle='#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(eyeX,eyeY,R*0.15,0,Math.PI*2);
+    ctx.fill();
   }
-  // Hayaletler
+
+  // ── HAYALETLER ────────────────────────────────────────────────────────────
   for(var gi=0;gi<PM.ghosts.length;gi++){
     var g=PM.ghosts[gi]; if(g.eaten) continue;
-    var gt=Math.min(Math.max(g.acc/g.tick,0),1);
-    var gx=(g.prevC+(g.col-g.prevC)*gt)*C+C/2;
-    var gy=(g.prevR+(g.row-g.prevR)*gt)*C+C/2;
-    var gr=C/2-1;
+    var gtt=Math.min(Math.max(g.acc/g.tick,0),1);
+    var gx=(g.prevC+(g.col-g.prevC)*gtt)*C+C/2;
+    var gy=(g.prevR+(g.row-g.prevR)*gtt)*C+C/2;
+    var gr=C/2-0.5;
     var flash=g.scared&&g.sTimer<2000&&Math.floor(PM.lastTs/200)%2===0;
-    var gc=g.scared?(flash?'#ffffff':'#0000cc'):g.color;
-    ctx.beginPath();
-    ctx.arc(gx,gy-gr*0.25,gr,Math.PI,0);
-    ctx.lineTo(gx+gr,gy+gr*0.75);
-    var hw=gr*0.67;
-    ctx.quadraticCurveTo(gx+gr-hw*0.5,gy+gr*0.25,gx+gr-hw,gy+gr*0.75);
-    ctx.quadraticCurveTo(gx-hw*0.5,gy+gr*0.25,gx,gy+gr*0.75);
-    ctx.quadraticCurveTo(gx-gr+hw*0.5,gy+gr*0.25,gx-gr+hw,gy+gr*0.75);
-    ctx.quadraticCurveTo(gx-gr+hw*0.5,gy+gr*0.25,gx-gr,gy+gr*0.75);
-    ctx.lineTo(gx-gr,gy-gr*0.25);
-    ctx.fillStyle=gc; ctx.fill();
-    if(!g.scared){
-      ctx.fillStyle='#fff';
-      ctx.beginPath();ctx.arc(gx-gr*0.35,gy-gr*0.15,gr*0.27,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(gx+gr*0.35,gy-gr*0.15,gr*0.27,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#00c';
-      ctx.beginPath();ctx.arc(gx-gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.13,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(gx+gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.13,0,Math.PI*2);ctx.fill();
+
+    var ghostColor;
+    if(g.scared){
+      ghostColor=flash?'#ffffff':'#2233cc';
     } else {
-      ctx.fillStyle='#fff';
-      ctx.beginPath();ctx.arc(gx-gr*0.3,gy-gr*0.1,gr*0.2,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(gx+gr*0.3,gy-gr*0.1,gr*0.2,0,Math.PI*2);ctx.fill();
+      ghostColor=g.color;
+    }
+
+    ctx.save();
+    // Hayalet glow
+    ctx.shadowColor=g.scared?'#2233cc':g.color;
+    ctx.shadowBlur=8;
+
+    // Vücut gradient
+    var ghostGrad=ctx.createLinearGradient(gx,gy-gr,gx,gy+gr);
+    if(g.scared){
+      ghostGrad.addColorStop(0,flash?'#ffffff':'#4455ee');
+      ghostGrad.addColorStop(1,flash?'#ccccff':'#1122aa');
+    } else {
+      ghostGrad.addColorStop(0,g.color);
+      ghostGrad.addColorStop(1,g.color.replace('FF','99').replace('ff','99'));
+    }
+
+    // Hayalet şekli çiz
+    ctx.beginPath();
+    ctx.arc(gx,gy-gr*0.2,gr,Math.PI,0);
+    ctx.lineTo(gx+gr,gy+gr*0.8);
+    var hw=gr*0.67;
+    ctx.quadraticCurveTo(gx+gr-hw*0.5,gy+gr*0.3,gx+gr-hw,gy+gr*0.8);
+    ctx.quadraticCurveTo(gx-hw*0.5,     gy+gr*0.3,gx,        gy+gr*0.8);
+    ctx.quadraticCurveTo(gx-gr+hw*0.5,  gy+gr*0.3,gx-gr+hw,  gy+gr*0.8);
+    ctx.quadraticCurveTo(gx-gr+hw*0.5,  gy+gr*0.3,gx-gr,     gy+gr*0.8);
+    ctx.lineTo(gx-gr,gy-gr*0.2);
+    ctx.fillStyle=ghostGrad;
+    ctx.fill();
+    ctx.restore();
+
+    // Gözler
+    if(!g.scared){
+      // Beyaz gözler
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath(); ctx.arc(gx-gr*0.35,gy-gr*0.15,gr*0.28,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+gr*0.35,gy-gr*0.15,gr*0.28,0,Math.PI*2); ctx.fill();
+      // Mavi göz bebekleri
+      ctx.fillStyle='#1565c0';
+      ctx.beginPath(); ctx.arc(gx-gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.14,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.14,0,Math.PI*2); ctx.fill();
+      // Işıltı
+      ctx.fillStyle='rgba(255,255,255,0.8)';
+      ctx.beginPath(); ctx.arc(gx-gr*0.30,gy-gr*0.22,gr*0.07,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(gx+gr*0.40,gy-gr*0.22,gr*0.07,0,Math.PI*2); ctx.fill();
+    } else {
+      // Korkmuş göz (X şeklinde)
+      ctx.strokeStyle='#ffffff';
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(gx-gr*0.45,gy-gr*0.2); ctx.lineTo(gx-gr*0.2,gy+gr*0.05); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx-gr*0.2,gy-gr*0.2);  ctx.lineTo(gx-gr*0.45,gy+gr*0.05); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx+gr*0.2,gy-gr*0.2);  ctx.lineTo(gx+gr*0.45,gy+gr*0.05); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx+gr*0.45,gy-gr*0.2); ctx.lineTo(gx+gr*0.2,gy+gr*0.05);  ctx.stroke();
     }
   }
 }
