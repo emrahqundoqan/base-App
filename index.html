@@ -736,28 +736,53 @@ function pmTickGhost(g,dt){
 
 function pmCheckCollision(){
   if(PM.invincible>0) return false;
+  var C=PM.C;
+  // Pac-Man pixel pozisyonu (son çizilen konum — t parametresi bilinmiyor,
+  // tile merkezini kullan: mevcut tile veya önceki tile'a yakın)
+  var pacX=PM.col*C+C/2;
+  var pacY=PM.row*C+C/2;
+
   for(var i=0;i<PM.ghosts.length;i++){
     var g=PM.ghosts[i];
     if(g.eaten) continue;
-    if(g.col===PM.col&&g.row===PM.row){
-      if(g.scared){
-        g.scared=false; g.sTimer=0; g.eaten=true;
-        PM.score+=200;
-        document.getElementById('pm-score').textContent=PM.score;
-        showToast('+200 puan!');
-        (function(ghost){
-          setTimeout(function(){
-            ghost.col=9; ghost.row=9; ghost.prevC=9; ghost.prevR=9;
-            ghost.lastDx=1; ghost.lastDy=0; ghost.acc=0; ghost.eaten=false;
-          },3000);
-        })(g);
-      } else {
-        PM.lives--;
-        pmUpdateLives();
-        if(PM.lives<=0){ pmGameOver(); return true; }
-        pmResetPositions();
-        PM.invincible=2500;
-      }
+
+    // Hayaletin pixel pozisyonu (smooth lerp ile)
+    var gtt=Math.min(Math.max(g.acc/g.tick,0),1);
+    var gx=(g.prevC+(g.col-g.prevC)*gtt)*C+C/2;
+    var gy=(g.prevR+(g.row-g.prevR)*gtt)*C+C/2;
+
+    // Tile mesafesi — hem mevcut hem önceki tile kontrol
+    var tileDist=Math.abs(g.col-PM.col)+Math.abs(g.row-PM.row);
+    var prevTileDist=Math.abs(g.prevC-PM.col)+Math.abs(g.prevR-PM.row);
+
+    // Pixel mesafesi
+    var dx=pacX-gx, dy=pacY-gy;
+    var pixDist=Math.sqrt(dx*dx+dy*dy);
+
+    // Çarpışma: ya aynı tile'da ya da pixel mesafesi C'den küçük
+    var hit=(tileDist===0)||(prevTileDist===0)||(pixDist<C*0.85);
+    if(!hit) continue;
+
+    if(g.scared){
+      // Pac-Man korkmuş hayaleti yedi
+      g.scared=false; g.sTimer=0; g.eaten=true;
+      PM.score+=200;
+      document.getElementById('pm-score').textContent=PM.score;
+      showToast('+200 puan!');
+      addTx('&#127919;','Pic-Man - Hayalet Yendi!',0);
+      (function(ghost){
+        setTimeout(function(){
+          ghost.col=9; ghost.row=9; ghost.prevC=9; ghost.prevR=9;
+          ghost.lastDx=1; ghost.lastDy=0; ghost.acc=0; ghost.eaten=false;
+        },3000);
+      })(g);
+    } else {
+      // Hayalet Pac-Man'ı yakaladı
+      PM.lives--;
+      pmUpdateLives();
+      if(PM.lives<=0){ pmGameOver(); return true; }
+      pmResetPositions();
+      PM.invincible=2500;
     }
   }
   return false;
