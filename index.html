@@ -934,17 +934,20 @@ function pmCheckCollision(){
     if(g.scared){
       PM.ghostEatStreak++;
       var bonus = Math.min(200*Math.pow(2,PM.ghostEatStreak-1),1600);
-      g.scared=false;g.sTimer=0;g.eaten=true;
+      g.scared=false; g.sTimer=0; g.eaten=true;
       PM.score+=bonus;
       document.getElementById('pm-score').textContent=PM.score;
-      showToast('+'+bonus+' puan! ('+PM.ghostEatStreak+'. hayalet)');
-      addTx('&#127919;','Pic-Man Hayalet Yendi x'+PM.ghostEatStreak,0);
-      (function(ghost){
+      // setTimeout ile yap — animation loop'u bloke etmesin
+      (function(streak, b, ghost){
         setTimeout(function(){
-          ghost.col=9;ghost.row=9;ghost.prevC=9;ghost.prevR=9;
-          ghost.lastDx=1;ghost.lastDy=0;ghost.acc=0;ghost.eaten=false;
+          showToast('+'+b+' puan! ('+streak+'. hayalet)');
+          addTx('&#127919;','Pic-Man Hayalet Yendi x'+streak,0);
+        },0);
+        setTimeout(function(){
+          ghost.col=9; ghost.row=9; ghost.prevC=9; ghost.prevR=9;
+          ghost.lastDx=1; ghost.lastDy=0; ghost.acc=0; ghost.eaten=false;
         },3000);
-      })(g);
+      })(PM.ghostEatStreak, bonus, g);
     } else {
       PM.lives--;
       PM.ghostEatStreak=0;
@@ -1107,23 +1110,28 @@ function pmDraw(t){
 
 function pmLoop(ts){
   if(!PM.running) return;
-  var dt=Math.min(ts-PM.lastTs,50);
-  PM.lastTs=ts;
-  if(PM.invincible>0) PM.invincible=Math.max(0,PM.invincible-dt);
-  PM.acc+=dt;
-  while(PM.acc>=PM.TICK){
-    PM.acc-=PM.TICK;
-    pmTickPac();
-    if(PM.eaten>=PM.totalPellets){pmLevelComplete();return;}
+  try{
+    var dt=Math.min(ts-PM.lastTs,50);
+    PM.lastTs=ts;
+    if(PM.invincible>0) PM.invincible=Math.max(0,PM.invincible-dt);
+    PM.acc+=dt;
+    while(PM.acc>=PM.TICK){
+      PM.acc-=PM.TICK;
+      pmTickPac();
+      if(PM.eaten>=PM.totalPellets){pmLevelComplete();return;}
+    }
+    for(var i=0;i<PM.ghosts.length;i++){
+      var g=PM.ghosts[i]; if(g.eaten) continue;
+      g.acc+=dt;
+      while(g.acc>=g.tick){ g.acc-=g.tick; pmTickGhost(g,g.tick); }
+    }
+    if(pmCheckCollision()) return;
+    pmDraw(PM.acc/PM.TICK);
+    PM.animId=requestAnimationFrame(pmLoop);
+  }catch(err){
+    console.error('pmLoop error:',err);
+    PM.animId=requestAnimationFrame(pmLoop);
   }
-  for(var i=0;i<PM.ghosts.length;i++){
-    var g=PM.ghosts[i]; if(g.eaten) continue;
-    g.acc+=dt;
-    while(g.acc>=g.tick){ g.acc-=g.tick; pmTickGhost(g,g.tick); }
-  }
-  if(pmCheckCollision()) return;
-  pmDraw(PM.acc/PM.TICK);
-  PM.animId=requestAnimationFrame(pmLoop);
 }
 
 function pmUpdateLives(){
@@ -1263,8 +1271,10 @@ async function connectWith(provider,rdns){
     updateUIConnected(); closeModal(); await checkNetwork();
     try{rawProv.on('chainChanged',function(){window.location.reload();});rawProv.on('accountsChanged',function(a){if(a.length)window.location.reload();else disconnect();});}catch(e){}
   }catch(e){
+    if(e.code===4001||e.code===-32603) return; // kullanıcı reddetti veya zaten bağlı
     var msg=(e.code===4001)?'Baglanti reddedildi.':(e.message||'Baglanti hatasi.').slice(0,60);
     showToast('Hata: '+msg);
+    console.warn('connectWith error:',e);
   }
 }
 
@@ -1353,9 +1363,13 @@ async function updateAllStats(){
     try{wS=await wc.getPlayerStats(acct);}catch(e){}
     try{dS=await dc.getPlayerStats(acct);}catch(e){}
     var checkInXP=Number(cRes[1]||0n)*10;
-    var totalXP=checkInXP+Number(wS[0]||0n)+Number(dS[0]||0n)+PM.xpEarned+NG.localXP+loadXP("gm");
-    document.getElementById('ck-streak').textContent=cRes[0].toString();
-    document.getElementById('ck-total').textContent=totalXP.toLocaleString('tr-TR');
+    var wheelXP=Number(wS[0]||0n);
+    var diceXP=Number(dS[0]||0n);
+    var totalXP=checkInXP+wheelXP+diceXP+PM.xpEarned+NG.localXP+loadXP("gm");
+    // Sadece 0'dan büyükse göster (kontrat hatası varsa eski değeri koru)
+    var streakVal=Number(cRes[0]||0n);
+    if(streakVal>0||checkInXP>0) document.getElementById('ck-streak').textContent=cRes[0].toString();
+    if(totalXP>0) document.getElementById('ck-total').textContent=totalXP.toLocaleString('tr-TR');
     // XP widget - tum kaynaklarin toplami
     setXPWidget(totalXP);
     document.getElementById('xp-level-global').innerHTML=getLevel(totalXP);
@@ -1686,7 +1700,7 @@ function switchTab(n){
   document.querySelectorAll('.tab,.pane').forEach(function(el){el.classList.remove('on');});
   document.getElementById('tab-'+n).classList.add('on');
   document.getElementById('pane-'+n).classList.add('on');
-  if(n==='games'){ drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); if(!PM.started) pmDraw(1); }
+  if(n==='games'){ drawWheel(wheelAngle); drawDice('d1-svg','d1-box',1); drawDice('d2-svg','d2-box',1); }
   if(n==='profile'){ updateAllStats(); renderTxHistory(); drawProfilePac(); }
 }
 
@@ -1696,7 +1710,10 @@ function switchSubTab(n){
   document.getElementById('spane-'+n).classList.add('on');
   if(n==='wheel') drawWheel(wheelAngle);
   if(n==='dice'){drawDice('d1-svg','d1-box',1);drawDice('d2-svg','d2-box',1);}
-  if(n==='pacman'&&!PM.started){pmDraw(1);}
+  if(n==='pacman'){
+    if(!PM.started){ pmInit(); }
+    pmDraw(1);
+  }
   if(n==='numgame'){ngInit();}
 }
 
@@ -1705,6 +1722,7 @@ function closeModal(){document.getElementById('modal-bg').classList.remove('on')
 function handleModalBgClick(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
 
 function drawProfilePac(){
+  try{
   var cv=document.getElementById('prof-pac-canvas');
   if(!cv) return;
   var ctx=cv.getContext('2d');
@@ -1721,6 +1739,7 @@ function drawProfilePac(){
   ctx.fillStyle=grad; ctx.fill(); ctx.restore();
   ctx.fillStyle='#1a1a2e';
   ctx.beginPath(); ctx.arc(cx+4,cy-10,2.5,0,Math.PI*2); ctx.fill();
+  }catch(e){}
 }
 
 function updateXPWidget(addedXP) {
@@ -1754,6 +1773,7 @@ function setXPWidget(totalXP) {
 }
 
 function updateProfile(ckXP, wheelXP, diceXP, totalXP, gmXP, numberXP) {
+  try{
   // Adres
   var addrEl = document.getElementById('prof-addr');
   if (addrEl) addrEl.textContent = acct ? (acct.slice(0,8)+'...'+acct.slice(-6)) : 'Cuzdan baglanmadi';
@@ -1796,6 +1816,7 @@ function updateProfile(ckXP, wheelXP, diceXP, totalXP, gmXP, numberXP) {
       return '<span class="badge" style="'+(b.earned?'background:var(--blue-light);color:var(--blue);border-color:var(--blue)':'opacity:.35')+'">'+b.label+'</span>';
     }).join('');
   }
+  }catch(e){ console.warn('updateProfile error:',e); }
 }
 
 function setSts(id,type,html){
@@ -1819,7 +1840,7 @@ window.onload=async function(){
   // localStorage'dan kalıcı XP'leri yükle
   loadAllLocalXP();
   drawWheel(0);
-  pmInit(); pmDraw(1);
+  pmInit(); setTimeout(function(){ pmDraw(1); }, 50);
   await initFarcasterSDK();
   if(!isFrameEnv){
     setTimeout(function(){if(Object.keys(wlts).length===0)renderWallets();},500);
