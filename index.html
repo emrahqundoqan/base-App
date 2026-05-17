@@ -1213,6 +1213,68 @@ document.addEventListener('keydown',function(e){
   if(e.key===' '||e.key==='Enter') pmStartOrRestart();
 });
 
+// ─── KALICI XP DEPOLAMA (localStorage) ──────────────────────────────────────
+function xpKey(source){
+  var addr=acct?acct.toLowerCase():'guest';
+  return 'basefun_xp_'+addr+'_'+source;
+}
+function saveXP(source,val){
+  try{localStorage.setItem(xpKey(source),String(val));}catch(e){}
+}
+function loadXP(source){
+  try{return parseInt(localStorage.getItem(xpKey(source))||'0')||0;}catch(e){return 0;}
+}
+function loadAllLocalXP(){
+  PM.xpEarned=loadXP('pacman');
+  NG.localXP=loadXP('number');
+  var pmEl=document.getElementById('pm-xp-earned');
+  if(pmEl) pmEl.textContent=PM.xpEarned;
+}
+
+// ─── İŞLEM GEÇMİŞİ ──────────────────────────────────────────────────────────
+function txKey(){
+  var addr=acct?acct.toLowerCase():'guest';
+  return 'basefun_tx_'+addr;
+}
+function loadTxHistory(){
+  try{return JSON.parse(localStorage.getItem(txKey())||'[]');}catch(e){return[];}
+}
+function saveTxHistory(list){
+  try{localStorage.setItem(txKey(),JSON.stringify(list.slice(0,10)));}catch(e){}
+}
+function addTx(icon,title,xp){
+  var list=loadTxHistory();
+  list.unshift({icon:icon,title:title,xp:xp,time:new Date().toISOString()});
+  saveTxHistory(list);
+  // renderTxHistory sadece profil sekmesi açıksa çağır
+  if(document.getElementById('pane-profile').classList.contains('on')){
+    renderTxHistory();
+  }
+}
+function renderTxHistory(){
+  var el=document.getElementById('prof-tx-list');
+  if(!el) return;
+  var list=loadTxHistory();
+  if(list.length===0){
+    el.innerHTML='<div style="text-align:center;color:var(--tx2);font-size:13px;padding:20px 0">Henuz islem yok</div>';
+    return;
+  }
+  el.innerHTML=list.map(function(tx){
+    var d=new Date(tx.time);
+    var dateStr=d.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    var timeStr=d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+    var xpStr=tx.xp>0?'+'+tx.xp+' XP':'';
+    return '<div class="tx-row">'
+      +'<div class="tx-icon">'+tx.icon+'</div>'
+      +'<div class="tx-info">'
+      +'<div class="tx-title">'+tx.title+'</div>'
+      +'<div class="tx-time">'+dateStr+' '+timeStr+'</div>'
+      +'</div>'
+      +(xpStr?'<div class="tx-xp">'+xpStr+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
 // ─── FARCASTER SDK ───────────────────────────────────────────────────────────
 async function initFarcasterSDK(){
   try{
@@ -1402,7 +1464,7 @@ async function doCheckIn(){
   setSts('ck-sts','pnd','Imzalaniyor...');
   try{
     var ck=new ethers.Contract(ADDR.CHECKIN,ABIS.CK,sgn);
-    var tx=await ck.checkIn({value:ethers.parseEther('0.00001')});
+    var tx=await ck.checkIn({value:ethers.parseEther('0.00001'),gasLimit:100000n});
     setSts('ck-sts','pnd','Dogrulanıyor...');
     await tx.wait();
     setSts('ck-sts','ok','Check-in basarili! +10 XP kazandin.');
@@ -1421,7 +1483,7 @@ async function sendMsg(t){
   setSts(t+'-sts','pnd','Imzalaniyor...');
   try{
     var c=new ethers.Contract(t==='gm'?ADDR.GM:ADDR.GN,ABIS.MSG,sgn);
-    var tx=await c[t]("",{value:ethers.parseEther('0.00001')});
+    var tx=await c[t]("",{value:ethers.parseEther('0.00001'),gasLimit:100000n});
     setSts(t+'-sts','pnd','Dogrulanıyor...');
     await tx.wait();
     setSts(t+'-sts','ok',(t==='gm'?'GM':'GN')+' gonderildi!');
@@ -1448,7 +1510,7 @@ async function rollDice(){
   setSts('roll-sts','pnd','Zar atılıyor...');
   try{
     var c=new ethers.Contract(ADDR.DICE,ABIS.DICE,sgn);
-    var tx=await c.rollDice({value:ethers.parseEther('0.00005')});
+    var tx=await c.rollDice({value:ethers.parseEther('0.00005'),gasLimit:150000n});
     var ani=setInterval(function(){drawDice('d1-svg','d1-box',Math.floor(Math.random()*6)+1);drawDice('d2-svg','d2-box',Math.floor(Math.random()*6)+1);},100);
     var receipt=await tx.wait(); clearInterval(ani);
     var iface=new ethers.Interface(ABIS.DICE);
@@ -1489,7 +1551,7 @@ async function spinWheel(){
   setSts('wheel-sts','pnd','Isleniyor...');
   try{
     var c=new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,sgn);
-    var tx=await c.spin({value:ethers.parseEther('0.00005')});
+    var tx=await c.spin({value:ethers.parseEther('0.00005'),gasLimit:150000n});
     setSts('wheel-sts','pnd','Dogrulanıyor...');
     var receipt=await tx.wait();
     var iface=new ethers.Interface(ABIS.WHEEL);
