@@ -390,8 +390,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
           <button ontouchstart="pmStartOrRestart()" onmousedown="pmStartOrRestart()"
             style="position:absolute;bottom:0;right:0;width:44px;height:44px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 8px rgba(0,82,255,.3)">&#9654;</button>
         </div>
-        <div style="font-size:11px;color:var(--tx2);text-align:center;margin-top:10px">
-          Tum yiyecekleri topla! Her seviye +XP kazan.
+        <div style="text-align:center;margin-top:10px">
+          <span id="pm-theme-name" style="font-size:11px;font-weight:700;color:var(--blue);font-family:'Space Mono',monospace"></span>
+          <span style="font-size:11px;color:var(--tx2)"> — Tum yiyecekleri topla!</span>
+        </div>
+        <div style="font-size:10px;color:var(--tx2);text-align:center;margin-top:4px">
+          ⭐ Yildiz pellet = +1 Can &bull; 10.000 puan = +1 Can (maks 5)
         </div>
         <div class="sts" id="pm-sts"></div>
       </div>
@@ -584,52 +588,207 @@ var ABIS={
 var acct=null,prov=null,sgn=null,rawProv=null;
 var wheelAngle=0,wlts={},toastTimer=null,isFrameEnv=false;
 
-// ─── PAC-MAN OYUNU ───────────────────────────────────────────────────────────
-// v5 - Temiz duvar mantığı:
-// Pac-Man bir yöne gider, o yönde duvar varsa DURUR.
-// Kullanıcı yön verene kadar HİÇ hareket etmez.
-// Yön verilince: o yön geçerliyse hemen hareket eder.
-// Yön buffer: köşe dönüşleri için birkaç tick önceden girilebilir.
+// ─── PAC-MAN OYUNU v6 ────────────────────────────────────────────────────────
+// Yenilikler:
+// • 7 farklı maze (her 3 seviyede bir yeni harita)
+// • Her seviye grubuna özel duvar rengi teması
+// • Can kaybet → aynı seviyeden devam (localStorage'da seviye saklanır)
+// • Can kazanma: her 10.000 puan'da +1 can (max 5)
+// • Hayalet yeme serisi bonusu: 200→400→800→1600 puan
+// • Özel "yıldız" pellet: nadiren çıkar, +1 can verir
 
-var MAZE=[
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
-  [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
-  [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-  [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
-  [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
-  [1,1,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,1,1],
-  [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
-  [1,1,1,1,2,1,0,1,1,0,0,1,1,0,1,2,1,1,1,1],
-  [0,0,0,0,2,0,0,1,0,0,0,0,1,0,0,2,0,0,0,0],
-  [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
-  [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
-  [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
-  [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
-  [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
-  [1,3,2,1,2,2,2,2,2,0,0,2,2,2,2,2,1,2,3,1],
-  [1,1,2,1,2,1,2,1,1,1,1,1,1,2,1,2,1,2,1,1],
-  [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+// ─── 7 FARKLI MAZE ───────────────────────────────────────────────────────────
+var MAZES = [
+
+// MAZE 0 — Klasik (1-3. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+ [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
+ [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
+ [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+ [1,1,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,1,1],
+ [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+ [1,1,1,1,2,1,0,1,1,0,0,1,1,0,1,2,1,1,1,1],
+ [0,0,0,0,2,0,0,1,0,0,0,0,1,0,0,2,0,0,0,0],
+ [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
+ [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+ [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
+ [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
+ [1,3,2,1,2,2,2,2,2,0,0,2,2,2,2,2,1,2,3,1],
+ [1,1,2,1,2,1,2,1,1,1,1,1,1,2,1,2,1,2,1,1],
+ [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+
+// MAZE 1 — Çapraz (4-6. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,2,2,2,2,1,2,2,1,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,1,2,1,2,2,1,2,1,1,2,1,1,2,1],
+ [1,3,1,1,2,1,1,2,2,2,2,2,2,1,1,2,1,1,3,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,2,2,1],
+ [1,2,1,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1,2,1],
+ [1,2,1,1,1,1,2,1,0,1,1,0,1,2,1,1,1,1,2,1],
+ [1,2,2,2,2,2,2,1,0,0,0,0,0,1,2,2,2,2,2,1],
+ [1,1,1,2,1,1,2,1,1,0,0,1,1,1,2,1,1,2,1,1],
+ [0,0,0,2,0,0,0,1,0,0,0,0,0,1,0,0,0,2,0,0],
+ [1,1,1,2,1,1,2,1,1,1,1,1,1,1,2,1,1,2,1,1],
+ [1,2,2,2,2,2,2,1,0,0,0,0,0,1,2,2,2,2,2,1],
+ [1,2,1,1,1,2,2,1,0,1,1,0,1,2,2,1,1,1,2,1],
+ [1,2,2,2,1,2,1,2,2,2,2,2,2,1,2,1,2,2,2,1],
+ [1,2,1,2,1,2,2,2,1,1,1,1,1,2,2,2,1,2,1,1],
+ [1,3,1,2,2,2,1,2,2,0,0,2,2,1,2,2,2,1,3,1],
+ [1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,2,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+
+// MAZE 2 — Labirent (7-9. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,3,1],
+ [1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1],
+ [1,2,1,2,1,1,1,1,1,2,1,2,1,1,1,1,2,1,2,1],
+ [1,2,2,2,1,2,2,2,1,2,1,2,1,2,2,2,2,1,2,1],
+ [1,1,1,2,1,2,1,2,2,2,1,2,2,2,1,2,1,1,2,1],
+ [1,2,2,2,1,2,1,1,1,0,1,0,1,2,1,2,2,2,2,1],
+ [1,2,1,1,1,2,1,0,0,0,0,0,0,1,1,2,1,1,2,1],
+ [1,2,1,2,2,2,1,0,1,0,0,0,1,0,2,2,2,1,2,1],
+ [0,0,0,2,1,0,0,0,1,0,0,0,1,0,0,0,2,0,0,0],
+ [1,2,1,2,2,2,1,0,1,1,1,1,1,0,2,2,2,1,2,1],
+ [1,2,1,1,1,2,1,0,0,0,0,0,0,1,1,2,1,1,2,1],
+ [1,2,2,2,1,2,2,1,1,0,1,0,1,1,1,2,2,2,2,1],
+ [1,1,1,2,1,1,2,2,2,2,1,2,2,2,1,1,1,1,2,1],
+ [1,2,2,2,2,2,2,1,1,2,1,2,1,1,2,2,2,2,2,1],
+ [1,3,1,1,1,1,2,2,2,2,1,2,2,2,2,1,1,1,2,1],
+ [1,2,2,2,2,1,1,1,1,2,1,2,1,1,1,1,2,2,2,1],
+ [1,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+
+// MAZE 3 — Açık alan (10-12. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
+ [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
+ [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+ [1,1,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,1,1],
+ [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+ [1,1,2,2,2,2,0,1,0,0,0,0,0,1,2,2,2,2,1,1],
+ [0,0,2,1,1,0,0,1,0,0,0,0,0,1,0,0,1,2,0,0],
+ [1,1,2,2,2,2,0,1,1,1,1,1,1,1,2,2,2,2,1,1],
+ [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+ [1,1,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,1,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
+ [1,3,2,1,2,2,2,2,2,0,0,2,2,2,2,2,1,2,3,1],
+ [1,2,2,1,2,1,1,1,1,1,1,1,1,1,1,2,1,2,2,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+
+// MAZE 4 — Dar koridorlar (13-15. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,1,2,2,2,2,1,1,2,2,2,2,1,2,2,2,1],
+ [1,2,1,2,1,2,1,1,2,1,1,2,1,1,2,1,2,1,3,1],
+ [1,2,1,2,2,2,1,1,2,2,2,2,1,1,2,2,2,1,2,1],
+ [1,2,1,1,1,2,1,1,1,2,2,1,1,1,1,2,1,1,2,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,1,1,2,1,1,2,1,1,1,1,1,1,2,1,1,2,1,1,1],
+ [1,2,2,2,1,1,2,1,0,1,1,0,1,2,1,1,2,2,2,1],
+ [1,2,1,1,1,1,2,1,0,0,0,0,0,1,2,1,1,1,2,1],
+ [1,2,1,2,2,2,2,1,0,0,0,0,0,1,2,2,2,1,2,1],
+ [0,0,0,2,1,1,0,1,0,0,0,0,0,1,0,0,2,0,0,0],
+ [1,2,1,2,2,2,2,1,0,1,1,1,0,1,2,2,2,1,2,1],
+ [1,2,1,1,1,1,2,1,0,0,0,0,0,1,2,1,1,1,2,1],
+ [1,2,2,2,1,1,2,1,0,1,1,0,1,2,1,1,2,2,2,1],
+ [1,1,1,2,1,1,2,1,1,1,1,1,1,2,1,1,2,1,1,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,3,1,1,1,2,1,1,1,2,2,1,1,1,1,2,1,1,2,1],
+ [1,2,1,2,2,2,1,1,2,2,2,2,1,1,2,2,2,1,2,1],
+ [1,2,2,2,1,2,2,2,2,1,1,2,2,2,2,1,2,2,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+
+// MAZE 5 — Spiral (16-18. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1],
+ [1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,3,1],
+ [1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1],
+ [1,2,1,2,1,2,2,2,2,2,2,2,2,2,2,1,2,1,2,1],
+ [1,2,1,2,1,2,1,1,1,1,1,1,1,2,1,1,2,1,2,1],
+ [1,2,1,2,1,2,1,0,0,0,0,0,1,2,1,1,2,1,2,1],
+ [1,2,1,2,1,2,1,0,1,1,1,0,1,2,1,1,2,1,2,1],
+ [1,2,1,2,1,2,1,0,1,0,0,0,1,2,1,1,2,1,2,1],
+ [0,0,0,2,1,2,1,0,1,0,0,0,1,2,1,0,2,0,0,0],
+ [1,2,1,2,1,2,1,0,1,1,1,1,1,2,1,1,2,1,2,1],
+ [1,2,1,2,1,2,1,0,0,0,0,0,0,2,1,1,2,1,2,1],
+ [1,2,1,2,1,2,1,1,1,1,1,1,2,2,1,1,2,1,2,1],
+ [1,2,1,2,1,2,2,2,2,2,2,2,2,1,1,1,2,1,2,1],
+ [1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1],
+ [1,3,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1],
+ [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+
+// MAZE 6 — Karmaşık Boss (19-21. seviye)
+[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [1,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,1],
+ [1,2,1,1,2,2,1,2,1,1,1,1,2,1,2,2,1,1,3,1],
+ [1,2,1,1,2,1,1,2,1,2,2,1,2,1,1,2,1,1,2,1],
+ [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+ [1,1,2,1,1,2,1,1,2,1,1,2,1,1,2,1,1,2,1,1],
+ [1,2,2,1,1,2,2,2,2,1,1,2,2,2,2,1,1,2,2,1],
+ [1,2,1,1,1,1,2,1,0,1,1,0,1,2,1,1,1,1,2,1],
+ [1,2,2,2,2,2,2,1,0,0,0,0,0,1,2,2,2,2,2,1],
+ [1,1,1,2,1,1,2,1,0,0,0,0,0,1,2,1,1,2,1,1],
+ [0,0,0,2,0,0,0,1,0,0,0,0,0,1,0,0,0,2,0,0],
+ [1,1,1,2,1,1,2,1,0,1,1,1,0,1,2,1,1,2,1,1],
+ [1,2,2,2,2,2,2,1,0,0,0,0,0,1,2,2,2,2,2,1],
+ [1,2,1,1,1,1,2,1,0,1,1,0,1,2,1,1,1,1,2,1],
+ [1,2,2,1,1,2,2,2,2,2,2,2,2,2,2,1,1,2,2,1],
+ [1,1,2,1,1,2,1,1,2,1,1,2,1,1,2,1,1,2,1,1],
+ [1,3,2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,1],
+ [1,2,1,1,2,1,1,2,1,1,1,1,1,2,1,1,2,1,2,1],
+ [1,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,1],
+ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
 ];
 
-var PM={
+// Her maze için duvar rengi teması
+var MAZE_THEMES = [
+  { wall:'#0d1b6e', border:'#3a6fff', glow:'rgba(58,111,255,0.07)',  bg1:'#05051a', bg2:'#0a0a2e', name:'Klasik Mavi'   }, // 1-3
+  { wall:'#1a0d3a', border:'#9b3fff', glow:'rgba(155,63,255,0.07)',  bg1:'#0a0514', bg2:'#150a2e', name:'Mor Derinlik'  }, // 4-6
+  { wall:'#003322', border:'#00ff88', glow:'rgba(0,255,136,0.07)',   bg1:'#000f0a', bg2:'#001a10', name:'Neon Orman'    }, // 7-9
+  { wall:'#1a0a00', border:'#ff6600', glow:'rgba(255,102,0,0.07)',   bg1:'#0f0500', bg2:'#1a0a00', name:'Ates Izi'      }, // 10-12
+  { wall:'#001a2e', border:'#00ccff', glow:'rgba(0,204,255,0.07)',   bg1:'#000a14', bg2:'#00101f', name:'Buz Sarayı'    }, // 13-15
+  { wall:'#1a1a00', border:'#ffff00', glow:'rgba(255,255,0,0.07)',   bg1:'#0a0a00', bg2:'#141400', name:'Siber Alan'    }, // 16-18
+  { wall:'#1a0000', border:'#ff0044', glow:'rgba(255,0,68,0.07)',    bg1:'#0f0000', bg2:'#1a0005', name:'Son Düello'    }  // 19-21
+];
+
+function pmGetMaze()    { return MAZES[Math.min(Math.floor((PM.level-1)/3), 6)]; }
+function pmGetTheme()   { return MAZE_THEMES[Math.min(Math.floor((PM.level-1)/3), 6)]; }
+
+var PM = {
   C:14, COLS:20, ROWS:20, TUNNEL_ROW:10,
   animId:null, running:false, started:false, gameOver:false,
   level:1, score:0, lives:3, xpEarned:0,
   col:10, row:16, prevCol:10, prevRow:16,
-  dx:0, dy:0,       // mevcut yön (0,0 = dur)
-  faceDx:1, faceDy:0, // son hareket yönü — ağız bu yöne bakar
-  qx:0, qy:0,       // kullanıcının sıradaki istediği yön (queue)
-  qttl:0,           // queue geçerliliği (tick sayısı)
+  dx:0, dy:0, faceDx:1, faceDy:0,
+  qx:0, qy:0, qttl:0,
   TICK:160, acc:0, lastTs:0,
   mouth:0.05, mouthDir:1,
   map:[], pellets:[],
   totalPellets:0, eaten:0,
   ghosts:[],
-  invincible:0
+  invincible:0,
+  ghostEatStreak:0,    // arka arkaya yenilen hayalet sayısı (bonus için)
+  scoreForLife:0       // can kazanmak için sayaç
 };
+
+// LocalStorage: seviyeyi kaydet/yükle
+function pmSaveLevel(){ try{ localStorage.setItem('basefun_pm_level', PM.level); }catch(e){} }
+function pmLoadLevel(){ try{ return Math.max(1,Math.min(21,parseInt(localStorage.getItem('basefun_pm_level')||'1'))); }catch(e){ return 1; } }
 
 function pmIsWall(r,c){
   if(r===PM.TUNNEL_ROW){ if(c<0||c>=PM.COLS) return false; }
@@ -639,29 +798,57 @@ function pmIsWall(r,c){
 }
 
 function pmInit(){
+  var maze = pmGetMaze();
   PM.map=[]; PM.pellets=[];
   PM.totalPellets=0; PM.eaten=0;
   for(var r=0;r<PM.ROWS;r++){
-    PM.map.push(MAZE[r].slice());
+    PM.map.push(maze[r].slice());
     for(var c=0;c<PM.COLS;c++){
-      if(MAZE[r][c]===2||MAZE[r][c]===3){
-        PM.pellets.push({r:r,c:c,power:MAZE[r][c]===3,eaten:false});
+      if(maze[r][c]===2||maze[r][c]===3){
+        PM.pellets.push({r:r,c:c,power:maze[r][c]===3,star:false,eaten:false});
         PM.totalPellets++;
       }
     }
   }
+  // Yıldız pellet: 2. ve 5. seviye mod3 başında 1 adet (can bonusu)
+  var lvlMod = (PM.level-1)%3;
+  if(lvlMod===1){
+    // Ortada boş bir tile'a yıldız koy
+    for(var i=0;i<PM.pellets.length;i++){
+      if(PM.pellets[i].r===12&&PM.pellets[i].c===9){
+        PM.pellets[i].star=true; break;
+      }
+    }
+  }
+
   PM.col=10; PM.row=16; PM.prevCol=10; PM.prevRow=16;
-  PM.dx=0; PM.dy=0; PM.faceDx=1; PM.faceDy=0; PM.qx=0; PM.qy=0; PM.qttl=0;
-  PM.acc=0; PM.invincible=0;
+  PM.dx=0; PM.dy=0; PM.faceDx=1; PM.faceDy=0;
+  PM.qx=0; PM.qy=0; PM.qttl=0;
+  PM.acc=0; PM.invincible=0; PM.ghostEatStreak=0;
   PM.mouth=0.05; PM.mouthDir=1;
-  PM.TICK=Math.max(60,160-PM.level*5);
-  var gT=Math.max(80,210-PM.level*7);
+  PM.TICK = Math.max(55, 180 - PM.level*7);
+  var gT   = Math.max(65, 230 - PM.level*9);
   PM.ghosts=[
-    {col:8, row:9,  prevC:8, prevR:9,  dx:1, dy:0, lastDx:1, lastDy:0, acc:0, tick:gT,    color:'#FF0000', scared:false, sTimer:0, eaten:false},
-    {col:11,row:9,  prevC:11,prevR:9,  dx:-1,dy:0, lastDx:-1,lastDy:0, acc:0, tick:gT+20, color:'#FFB8FF', scared:false, sTimer:0, eaten:false},
-    {col:8, row:11, prevC:8, prevR:11, dx:1, dy:0, lastDx:1, lastDy:0, acc:0, tick:gT+40, color:'#00FFFF', scared:false, sTimer:0, eaten:false},
-    {col:11,row:11, prevC:11,prevR:11, dx:-1,dy:0, lastDx:-1,lastDy:0, acc:0, tick:gT+60, color:'#FFB852', scared:false, sTimer:0, eaten:false}
+    {col:8, row:9,  prevC:8, prevR:9,  dx:1, dy:0, lastDx:1, lastDy:0, acc:0, tick:gT,    color:'#FF2222', scared:false, sTimer:0, eaten:false},
+    {col:11,row:9,  prevC:11,prevR:9,  dx:-1,dy:0, lastDx:-1,lastDy:0, acc:0, tick:gT+20, color:'#FF88FF', scared:false, sTimer:0, eaten:false},
+    {col:8, row:11, prevC:8, prevR:11, dx:1, dy:0, lastDx:1, lastDy:0, acc:0, tick:gT+40, color:'#22FFFF', scared:false, sTimer:0, eaten:false},
+    {col:11,row:11, prevC:11,prevR:11, dx:-1,dy:0, lastDx:-1,lastDy:0, acc:0, tick:gT+60, color:'#FFAA22', scared:false, sTimer:0, eaten:false}
   ];
+  // Seviye 7+'den 5. hayalet ekle
+  if(PM.level>=7){
+    PM.ghosts.push({col:9,row:10,prevC:9,prevR:10,dx:0,dy:-1,lastDx:0,lastDy:-1,acc:0,tick:gT+80,color:'#FF44AA',scared:false,sTimer:0,eaten:false});
+  }
+
+  pmSaveLevel();
+  pmUpdateLevelLabel();
+}
+
+function pmUpdateLevelLabel(){
+  var theme = pmGetTheme();
+  document.getElementById('pm-level').textContent = PM.level+' / 21';
+  // Seviye temasını göster
+  var themeEl = document.getElementById('pm-theme-name');
+  if(themeEl) themeEl.textContent = theme.name;
 }
 
 function pmEatPellet(){
@@ -669,13 +856,23 @@ function pmEatPellet(){
     var p=PM.pellets[i];
     if(!p.eaten&&p.c===PM.col&&p.r===PM.row){
       p.eaten=true; PM.eaten++;
-      if(p.power){
-        PM.score+=50;
+      if(p.star){
+        // Yıldız: +1 can (max 5)
+        if(PM.lives<5){ PM.lives++; pmUpdateLives(); showToast('⭐ +1 Can kazandın!'); }
+        else { PM.score+=500; showToast('⭐ +500 puan!'); }
+        PM.score+=100;
+      } else if(p.power){
+        PM.score+=50; PM.ghostEatStreak=0;
         for(var g=0;g<PM.ghosts.length;g++){
           if(!PM.ghosts[g].eaten){ PM.ghosts[g].scared=true; PM.ghosts[g].sTimer=7000; }
         }
-        showToast('POWER UP!');
+        showToast('POWER UP! Hayaletler korktu!');
       } else { PM.score+=10; }
+      // Can kazanma: her 10.000 puan'da +1 can
+      var prevLife = Math.floor((PM.score-10)/10000);
+      var newLife  = Math.floor(PM.score/10000);
+      if(newLife>prevLife && PM.lives<5){ PM.lives++; pmUpdateLives(); showToast('🎁 +1 Can! (10.000 puan)'); }
+
       document.getElementById('pm-score').textContent=PM.score;
       return;
     }
@@ -683,40 +880,25 @@ function pmEatPellet(){
 }
 
 function pmTickPac(){
-  // 1. Kullanıcının yön isteğini (qx/qy) kontrol et
-  //    Geçerliyse dx/dy'ye uygula, değilse qttl sayacını azalt
-  if(PM.qttl > 0){
-    if(!pmIsWall(PM.row + PM.qy, PM.col + PM.qx)){
-      PM.dx = PM.qx; PM.dy = PM.qy;
-      PM.qx = 0; PM.qy = 0; PM.qttl = 0;
-    } else {
-      PM.qttl--;
-      if(PM.qttl === 0){ PM.qx = 0; PM.qy = 0; }
-    }
+  if(PM.qttl>0){
+    if(!pmIsWall(PM.row+PM.qy,PM.col+PM.qx)){
+      PM.dx=PM.qx; PM.dy=PM.qy; PM.qx=0; PM.qy=0; PM.qttl=0;
+    } else { PM.qttl--; if(PM.qttl===0){PM.qx=0;PM.qy=0;} }
   }
-
-  // 2. Hareket: dx=dy=0 ise durmuş, hareket etme
-  if(PM.dx === 0 && PM.dy === 0) return;
-
-  var nc = PM.col + PM.dx;
-  var nr = PM.row + PM.dy;
-  if(!pmIsWall(nr, nc)){
-    // Önü açık: bir tile ilerle
-    PM.prevCol = PM.col; PM.prevRow = PM.row;
-    PM.col = nc; PM.row = nr;
-    PM.faceDx = PM.dx; PM.faceDy = PM.dy; // son yönü sakla
-    if(PM.col < 0){ PM.col = PM.COLS-1; PM.prevCol = PM.COLS-1; }
-    if(PM.col >= PM.COLS){ PM.col = 0; PM.prevCol = 0; }
+  if(PM.dx===0&&PM.dy===0) return;
+  var nc=PM.col+PM.dx, nr=PM.row+PM.dy;
+  if(!pmIsWall(nr,nc)){
+    PM.prevCol=PM.col; PM.prevRow=PM.row;
+    PM.col=nc; PM.row=nr;
+    PM.faceDx=PM.dx; PM.faceDy=PM.dy;
+    if(PM.col<0){PM.col=PM.COLS-1;PM.prevCol=PM.COLS-1;}
+    if(PM.col>=PM.COLS){PM.col=0;PM.prevCol=0;}
     pmEatPellet();
-  } else {
-    // Önde DUVAR: dx=dy=0 yap → tamamen dur
-    // Pac-Man tile merkezinde kalır, kullanıcı yön verene kadar bekler
-    PM.dx = 0; PM.dy = 0;
-  }
+  } else { PM.dx=0; PM.dy=0; }
 }
 
 function pmTickGhost(g,dt){
-  if(g.scared){ g.sTimer-=dt; if(g.sTimer<=0){g.scared=false;g.sTimer=0;} }
+  if(g.scared){g.sTimer-=dt;if(g.sTimer<=0){g.scared=false;g.sTimer=0;}}
   var DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
   var possible=DIRS.filter(function(d){
     if(d[0]===-g.lastDx&&d[1]===-g.lastDy) return false;
@@ -724,12 +906,12 @@ function pmTickGhost(g,dt){
   });
   if(possible.length===0) possible=[[-g.lastDx,-g.lastDy]];
   var chosen=possible[Math.floor(Math.random()*possible.length)];
-  var nc=g.col+chosen[0], nr=g.row+chosen[1];
+  var nc=g.col+chosen[0],nr=g.row+chosen[1];
   if(!pmIsWall(nr,nc)){
-    g.prevC=g.col; g.prevR=g.row;
-    g.col=nc; g.row=nr;
-    g.lastDx=chosen[0]; g.lastDy=chosen[1];
-    g.dx=chosen[0]; g.dy=chosen[1];
+    g.prevC=g.col;g.prevR=g.row;
+    g.col=nc;g.row=nr;
+    g.lastDx=chosen[0];g.lastDy=chosen[1];
+    g.dx=chosen[0];g.dy=chosen[1];
     g.acc=0;
   }
 }
@@ -737,50 +919,37 @@ function pmTickGhost(g,dt){
 function pmCheckCollision(){
   if(PM.invincible>0) return false;
   var C=PM.C;
-  // Pac-Man pixel pozisyonu (son çizilen konum — t parametresi bilinmiyor,
-  // tile merkezini kullan: mevcut tile veya önceki tile'a yakın)
-  var pacX=PM.col*C+C/2;
-  var pacY=PM.row*C+C/2;
-
+  var pacX=PM.col*C+C/2, pacY=PM.row*C+C/2;
   for(var i=0;i<PM.ghosts.length;i++){
-    var g=PM.ghosts[i];
-    if(g.eaten) continue;
-
-    // Hayaletin pixel pozisyonu (smooth lerp ile)
+    var g=PM.ghosts[i]; if(g.eaten) continue;
     var gtt=Math.min(Math.max(g.acc/g.tick,0),1);
     var gx=(g.prevC+(g.col-g.prevC)*gtt)*C+C/2;
     var gy=(g.prevR+(g.row-g.prevR)*gtt)*C+C/2;
-
-    // Tile mesafesi — hem mevcut hem önceki tile kontrol
     var tileDist=Math.abs(g.col-PM.col)+Math.abs(g.row-PM.row);
     var prevTileDist=Math.abs(g.prevC-PM.col)+Math.abs(g.prevR-PM.row);
-
-    // Pixel mesafesi
-    var dx=pacX-gx, dy=pacY-gy;
+    var dx=pacX-gx,dy=pacY-gy;
     var pixDist=Math.sqrt(dx*dx+dy*dy);
-
-    // Çarpışma: ya aynı tile'da ya da pixel mesafesi C'den küçük
     var hit=(tileDist===0)||(prevTileDist===0)||(pixDist<C*0.85);
     if(!hit) continue;
-
     if(g.scared){
-      // Pac-Man korkmuş hayaleti yedi
-      g.scared=false; g.sTimer=0; g.eaten=true;
-      PM.score+=200;
+      PM.ghostEatStreak++;
+      var bonus = Math.min(200*Math.pow(2,PM.ghostEatStreak-1),1600);
+      g.scared=false;g.sTimer=0;g.eaten=true;
+      PM.score+=bonus;
       document.getElementById('pm-score').textContent=PM.score;
-      showToast('+200 puan!');
-      addTx('&#127919;','Pic-Man - Hayalet Yendi!',0);
+      showToast('+'+bonus+' puan! ('+PM.ghostEatStreak+'. hayalet)');
+      addTx('&#127919;','Pic-Man Hayalet Yendi x'+PM.ghostEatStreak,0);
       (function(ghost){
         setTimeout(function(){
-          ghost.col=9; ghost.row=9; ghost.prevC=9; ghost.prevR=9;
-          ghost.lastDx=1; ghost.lastDy=0; ghost.acc=0; ghost.eaten=false;
+          ghost.col=9;ghost.row=9;ghost.prevC=9;ghost.prevR=9;
+          ghost.lastDx=1;ghost.lastDy=0;ghost.acc=0;ghost.eaten=false;
         },3000);
       })(g);
     } else {
-      // Hayalet Pac-Man'ı yakaladı
       PM.lives--;
+      PM.ghostEatStreak=0;
       pmUpdateLives();
-      if(PM.lives<=0){ pmGameOver(); return true; }
+      if(PM.lives<=0){pmGameOver();return true;}
       pmResetPositions();
       PM.invincible=2500;
     }
@@ -789,14 +958,15 @@ function pmCheckCollision(){
 }
 
 function pmResetPositions(){
-  PM.col=10; PM.row=16; PM.prevCol=10; PM.prevRow=16;
-  PM.dx=0; PM.dy=0; PM.qx=0; PM.qy=0; PM.qttl=0; PM.acc=0;
-  var gs=[[8,9],[11,9],[8,11],[11,11]];
+  PM.col=10;PM.row=16;PM.prevCol=10;PM.prevRow=16;
+  PM.dx=0;PM.dy=0;PM.qx=0;PM.qy=0;PM.qttl=0;PM.acc=0;
+  var gs=[[8,9],[11,9],[8,11],[11,11],[9,10]];
   for(var i=0;i<PM.ghosts.length;i++){
-    PM.ghosts[i].col=gs[i][1]; PM.ghosts[i].row=gs[i][0];
-    PM.ghosts[i].prevC=gs[i][1]; PM.ghosts[i].prevR=gs[i][0];
-    PM.ghosts[i].acc=0; PM.ghosts[i].scared=false;
-    PM.ghosts[i].sTimer=0; PM.ghosts[i].eaten=false;
+    if(!gs[i]) continue;
+    PM.ghosts[i].col=gs[i][1];PM.ghosts[i].row=gs[i][0];
+    PM.ghosts[i].prevC=gs[i][1];PM.ghosts[i].prevR=gs[i][0];
+    PM.ghosts[i].acc=0;PM.ghosts[i].scared=false;
+    PM.ghosts[i].sTimer=0;PM.ghosts[i].eaten=false;
   }
 }
 
@@ -804,129 +974,88 @@ function pmDraw(t){
   var cv=document.getElementById('pm-canvas');
   if(!cv) return;
   var ctx=cv.getContext('2d');
-  var C=PM.C;
-  var W=cv.width, H=cv.height;
+  var C=PM.C, W=cv.width, H=cv.height;
+  var theme=pmGetTheme();
 
-  // ── ARKA PLAN ────────────────────────────────────────────────────────────
+  // Arka plan
   var bgGrad=ctx.createLinearGradient(0,0,W,H);
-  bgGrad.addColorStop(0,'#05051a');
-  bgGrad.addColorStop(1,'#0a0a2e');
+  bgGrad.addColorStop(0,theme.bg1);
+  bgGrad.addColorStop(1,theme.bg2);
   ctx.fillStyle=bgGrad;
   ctx.fillRect(0,0,W,H);
 
-  // ── DUVARLAR ─────────────────────────────────────────────────────────────
+  // Duvarlar
   for(var r=0;r<PM.ROWS;r++){
     for(var c=0;c<PM.COLS;c++){
       if(PM.map[r][c]!==1) continue;
-      var wx=c*C, wy=r*C;
-
-      // Duvar dolgu — koyu lacivert
-      ctx.fillStyle='#0d1b6e';
+      var wx=c*C,wy=r*C;
+      ctx.fillStyle=theme.wall;
       ctx.fillRect(wx,wy,C,C);
-
-      // Neon mavi kenar çizgisi (sadece koridor komşu olan kenarlara)
-      ctx.strokeStyle='#3a6fff';
+      ctx.strokeStyle=theme.border;
       ctx.lineWidth=1;
-      // Üst kenar
-      if(r===0||PM.map[r-1][c]!==1){
-        ctx.beginPath(); ctx.moveTo(wx,wy+0.5); ctx.lineTo(wx+C,wy+0.5); ctx.stroke();
-      }
-      // Alt kenar
-      if(r===PM.ROWS-1||PM.map[r+1][c]!==1){
-        ctx.beginPath(); ctx.moveTo(wx,wy+C-0.5); ctx.lineTo(wx+C,wy+C-0.5); ctx.stroke();
-      }
-      // Sol kenar
-      if(c===0||PM.map[r][c-1]!==1){
-        ctx.beginPath(); ctx.moveTo(wx+0.5,wy); ctx.lineTo(wx+0.5,wy+C); ctx.stroke();
-      }
-      // Sağ kenar
-      if(c===PM.COLS-1||PM.map[r][c+1]!==1){
-        ctx.beginPath(); ctx.moveTo(wx+C-0.5,wy); ctx.lineTo(wx+C-0.5,wy+C); ctx.stroke();
-      }
-
-      // Neon glow — iç parlama
-      ctx.fillStyle='rgba(58,111,255,0.07)';
+      if(r===0||PM.map[r-1][c]!==1){ctx.beginPath();ctx.moveTo(wx,wy+0.5);ctx.lineTo(wx+C,wy+0.5);ctx.stroke();}
+      if(r===PM.ROWS-1||PM.map[r+1][c]!==1){ctx.beginPath();ctx.moveTo(wx,wy+C-0.5);ctx.lineTo(wx+C,wy+C-0.5);ctx.stroke();}
+      if(c===0||PM.map[r][c-1]!==1){ctx.beginPath();ctx.moveTo(wx+0.5,wy);ctx.lineTo(wx+0.5,wy+C);ctx.stroke();}
+      if(c===PM.COLS-1||PM.map[r][c+1]!==1){ctx.beginPath();ctx.moveTo(wx+C-0.5,wy);ctx.lineTo(wx+C-0.5,wy+C);ctx.stroke();}
+      ctx.fillStyle=theme.glow;
       ctx.fillRect(wx+1,wy+1,C-2,C-2);
     }
   }
 
-  // ── PELLETler ─────────────────────────────────────────────────────────────
+  // Pelletler
   for(var pi=0;pi<PM.pellets.length;pi++){
     var p=PM.pellets[pi]; if(p.eaten) continue;
-    var px2=p.c*C+C/2, py2=p.r*C+C/2;
-    if(p.power){
-      // Power pellet: neon sarı, glow efekti
-      ctx.save();
-      ctx.shadowColor='#ffe000';
-      ctx.shadowBlur=8;
-      ctx.fillStyle='#ffe000';
-      ctx.beginPath();
-      ctx.arc(px2,py2,4,0,Math.PI*2);
-      ctx.fill();
-      // İç parlak nokta
-      ctx.shadowBlur=0;
+    var px2=p.c*C+C/2,py2=p.r*C+C/2;
+    ctx.save();
+    if(p.star){
+      // Yıldız pellet — beyaz, büyük glow
+      ctx.shadowColor='#ffffff'; ctx.shadowBlur=12;
       ctx.fillStyle='#ffffff';
-      ctx.beginPath();
-      ctx.arc(px2,py2,1.5,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
+      ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('★',px2,py2);
+    } else if(p.power){
+      ctx.shadowColor='#ffe000'; ctx.shadowBlur=10;
+      ctx.fillStyle='#ffe000';
+      ctx.beginPath();ctx.arc(px2,py2,4,0,Math.PI*2);ctx.fill();
+      ctx.shadowBlur=0; ctx.fillStyle='#ffffff';
+      ctx.beginPath();ctx.arc(px2,py2,1.5,0,Math.PI*2);ctx.fill();
     } else {
-      // Normal pellet: küçük parlak nokta
-      ctx.save();
-      ctx.shadowColor='rgba(200,200,255,0.6)';
-      ctx.shadowBlur=3;
+      ctx.shadowColor='rgba(200,200,255,0.5)'; ctx.shadowBlur=3;
       ctx.fillStyle='#c8c8ff';
-      ctx.beginPath();
-      ctx.arc(px2,py2,2,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
+      ctx.beginPath();ctx.arc(px2,py2,2,0,Math.PI*2);ctx.fill();
     }
+    ctx.restore();
   }
 
-  // ── PAC-MAN ───────────────────────────────────────────────────────────────
+  // Pac-Man
   var lerp=(PM.dx===0&&PM.dy===0)?1:Math.min(Math.max(t,0),1);
   var pacX=(PM.prevCol+(PM.col-PM.prevCol)*lerp)*C+C/2;
   var pacY=(PM.prevRow+(PM.row-PM.prevRow)*lerp)*C+C/2;
   var hide=PM.invincible>0&&Math.floor(PM.lastTs/150)%2===1;
   if(!hide){
     PM.mouth+=PM.mouthDir*0.05;
-    if(PM.mouth>0.27) PM.mouthDir=-1;
-    if(PM.mouth<0.02) PM.mouthDir=1;
-    var faceDx = (PM.dx!==0||PM.dy!==0) ? PM.dx : (PM.faceDx||1);
-    var faceDy = (PM.dx!==0||PM.dy!==0) ? PM.dy : (PM.faceDy||0);
-    var angle=Math.atan2(faceDy,faceDx);
+    if(PM.mouth>0.27)PM.mouthDir=-1;
+    if(PM.mouth<0.02)PM.mouthDir=1;
+    var fd=PM.faceDx,fy=PM.faceDy;
+    var angle=Math.atan2(fy,fd);
     var R=C/2-0.5;
-
-    // Pac-Man glow
     ctx.save();
-    ctx.shadowColor='#ffe000';
-    ctx.shadowBlur=10;
-
-    // Gradient fill
+    ctx.shadowColor='#ffe000'; ctx.shadowBlur=10;
     var pacGrad=ctx.createRadialGradient(pacX-R*0.3,pacY-R*0.3,0,pacX,pacY,R);
     pacGrad.addColorStop(0,'#fff176');
     pacGrad.addColorStop(0.5,'#FFE000');
     pacGrad.addColorStop(1,'#f9a825');
-
-    ctx.beginPath();
-    ctx.moveTo(pacX,pacY);
+    ctx.beginPath();ctx.moveTo(pacX,pacY);
     ctx.arc(pacX,pacY,R,angle+PM.mouth*Math.PI,angle+(2-PM.mouth)*Math.PI);
-    ctx.closePath();
-    ctx.fillStyle=pacGrad;
-    ctx.fill();
+    ctx.closePath();ctx.fillStyle=pacGrad;ctx.fill();
     ctx.restore();
-
     // Göz
-    var eyeAngle=angle-Math.PI*0.35;
-    var eyeX=pacX+Math.cos(eyeAngle)*R*0.55;
-    var eyeY=pacY+Math.sin(eyeAngle)*R*0.55;
+    var eyeA=angle-Math.PI*0.35;
     ctx.fillStyle='#1a1a2e';
-    ctx.beginPath();
-    ctx.arc(eyeX,eyeY,R*0.15,0,Math.PI*2);
-    ctx.fill();
+    ctx.beginPath();ctx.arc(pacX+Math.cos(eyeA)*R*0.55,pacY+Math.sin(eyeA)*R*0.55,R*0.15,0,Math.PI*2);ctx.fill();
   }
 
-  // ── HAYALETLER ────────────────────────────────────────────────────────────
+  // Hayaletler
   for(var gi=0;gi<PM.ghosts.length;gi++){
     var g=PM.ghosts[gi]; if(g.eaten) continue;
     var gtt=Math.min(Math.max(g.acc/g.tick,0),1);
@@ -934,65 +1063,44 @@ function pmDraw(t){
     var gy=(g.prevR+(g.row-g.prevR)*gtt)*C+C/2;
     var gr=C/2-0.5;
     var flash=g.scared&&g.sTimer<2000&&Math.floor(PM.lastTs/200)%2===0;
-
-    var ghostColor;
-    if(g.scared){
-      ghostColor=flash?'#ffffff':'#2233cc';
-    } else {
-      ghostColor=g.color;
-    }
-
+    var gc=g.scared?(flash?'#ffffff':'#2233cc'):g.color;
     ctx.save();
-    // Hayalet glow
-    ctx.shadowColor=g.scared?'#2233cc':g.color;
-    ctx.shadowBlur=8;
-
-    // Vücut gradient
+    ctx.shadowColor=g.scared?'#2233cc':g.color;ctx.shadowBlur=8;
     var ghostGrad=ctx.createLinearGradient(gx,gy-gr,gx,gy+gr);
     if(g.scared){
       ghostGrad.addColorStop(0,flash?'#ffffff':'#4455ee');
       ghostGrad.addColorStop(1,flash?'#ccccff':'#1122aa');
     } else {
       ghostGrad.addColorStop(0,g.color);
-      ghostGrad.addColorStop(1,g.color.replace('FF','99').replace('ff','99'));
+      ghostGrad.addColorStop(1,g.color.replace(/FF/g,'88').replace(/ff/g,'88'));
     }
-
-    // Hayalet şekli çiz
     ctx.beginPath();
     ctx.arc(gx,gy-gr*0.2,gr,Math.PI,0);
     ctx.lineTo(gx+gr,gy+gr*0.8);
     var hw=gr*0.67;
     ctx.quadraticCurveTo(gx+gr-hw*0.5,gy+gr*0.3,gx+gr-hw,gy+gr*0.8);
-    ctx.quadraticCurveTo(gx-hw*0.5,     gy+gr*0.3,gx,        gy+gr*0.8);
-    ctx.quadraticCurveTo(gx-gr+hw*0.5,  gy+gr*0.3,gx-gr+hw,  gy+gr*0.8);
-    ctx.quadraticCurveTo(gx-gr+hw*0.5,  gy+gr*0.3,gx-gr,     gy+gr*0.8);
+    ctx.quadraticCurveTo(gx-hw*0.5,gy+gr*0.3,gx,gy+gr*0.8);
+    ctx.quadraticCurveTo(gx-gr+hw*0.5,gy+gr*0.3,gx-gr+hw,gy+gr*0.8);
+    ctx.quadraticCurveTo(gx-gr+hw*0.5,gy+gr*0.3,gx-gr,gy+gr*0.8);
     ctx.lineTo(gx-gr,gy-gr*0.2);
-    ctx.fillStyle=ghostGrad;
-    ctx.fill();
+    ctx.fillStyle=ghostGrad;ctx.fill();
     ctx.restore();
-
-    // Gözler
     if(!g.scared){
-      // Beyaz gözler
       ctx.fillStyle='#ffffff';
-      ctx.beginPath(); ctx.arc(gx-gr*0.35,gy-gr*0.15,gr*0.28,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(gx+gr*0.35,gy-gr*0.15,gr*0.28,0,Math.PI*2); ctx.fill();
-      // Mavi göz bebekleri
+      ctx.beginPath();ctx.arc(gx-gr*0.35,gy-gr*0.15,gr*0.28,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(gx+gr*0.35,gy-gr*0.15,gr*0.28,0,Math.PI*2);ctx.fill();
       ctx.fillStyle='#1565c0';
-      ctx.beginPath(); ctx.arc(gx-gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.14,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(gx+gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.14,0,Math.PI*2); ctx.fill();
-      // Işıltı
+      ctx.beginPath();ctx.arc(gx-gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.14,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(gx+gr*0.35+g.dx*2,gy-gr*0.15+g.dy*2,gr*0.14,0,Math.PI*2);ctx.fill();
       ctx.fillStyle='rgba(255,255,255,0.8)';
-      ctx.beginPath(); ctx.arc(gx-gr*0.30,gy-gr*0.22,gr*0.07,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(gx+gr*0.40,gy-gr*0.22,gr*0.07,0,Math.PI*2); ctx.fill();
+      ctx.beginPath();ctx.arc(gx-gr*0.30,gy-gr*0.22,gr*0.07,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(gx+gr*0.40,gy-gr*0.22,gr*0.07,0,Math.PI*2);ctx.fill();
     } else {
-      // Korkmuş göz (X şeklinde)
-      ctx.strokeStyle='#ffffff';
-      ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(gx-gr*0.45,gy-gr*0.2); ctx.lineTo(gx-gr*0.2,gy+gr*0.05); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(gx-gr*0.2,gy-gr*0.2);  ctx.lineTo(gx-gr*0.45,gy+gr*0.05); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(gx+gr*0.2,gy-gr*0.2);  ctx.lineTo(gx+gr*0.45,gy+gr*0.05); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(gx+gr*0.45,gy-gr*0.2); ctx.lineTo(gx+gr*0.2,gy+gr*0.05);  ctx.stroke();
+      ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(gx-gr*0.45,gy-gr*0.2);ctx.lineTo(gx-gr*0.2,gy+gr*0.05);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(gx-gr*0.2,gy-gr*0.2);ctx.lineTo(gx-gr*0.45,gy+gr*0.05);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(gx+gr*0.2,gy-gr*0.2);ctx.lineTo(gx+gr*0.45,gy+gr*0.05);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(gx+gr*0.45,gy-gr*0.2);ctx.lineTo(gx+gr*0.2,gy+gr*0.05);ctx.stroke();
     }
   }
 }
@@ -1002,21 +1110,16 @@ function pmLoop(ts){
   var dt=Math.min(ts-PM.lastTs,50);
   PM.lastTs=ts;
   if(PM.invincible>0) PM.invincible=Math.max(0,PM.invincible-dt);
-  // Pac-Man tick — sadece BİR tick per frame (while yerine if)
   PM.acc+=dt;
-  if(PM.acc>=PM.TICK){
+  while(PM.acc>=PM.TICK){
     PM.acc-=PM.TICK;
     pmTickPac();
-    if(PM.eaten>=PM.totalPellets){ pmLevelComplete(); return; }
+    if(PM.eaten>=PM.totalPellets){pmLevelComplete();return;}
   }
-  // Hayalet tick
   for(var i=0;i<PM.ghosts.length;i++){
     var g=PM.ghosts[i]; if(g.eaten) continue;
     g.acc+=dt;
-    if(g.acc>=g.tick){
-      g.acc-=g.tick;
-      pmTickGhost(g,g.tick);
-    }
+    while(g.acc>=g.tick){ g.acc-=g.tick; pmTickGhost(g,g.tick); }
   }
   if(pmCheckCollision()) return;
   pmDraw(PM.acc/PM.TICK);
@@ -1024,7 +1127,8 @@ function pmLoop(ts){
 }
 
 function pmUpdateLives(){
-  var h=''; for(var i=0;i<PM.lives;i++) h+='&#128993;';
+  var h='';
+  for(var i=0;i<PM.lives;i++) h+='&#128993;';
   document.getElementById('pm-lives').innerHTML=h;
 }
 
@@ -1033,11 +1137,11 @@ function pmShowMsg(txt,sub){
   el.innerHTML=txt+(sub?('<br><span style="font-size:11px;opacity:.7">'+sub+'</span>'):'');
   el.classList.add('on');
 }
-function pmHideMsg(){ document.getElementById('pm-msg').classList.remove('on'); }
+function pmHideMsg(){document.getElementById('pm-msg').classList.remove('on');}
 
 function pmLevelComplete(){
   PM.running=false;
-  if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
+  if(PM.animId){cancelAnimationFrame(PM.animId);PM.animId=null;}
   var xp=PM.level*15+Math.floor(PM.score/10);
   PM.xpEarned+=xp;
   saveXP('pacman',PM.xpEarned);
@@ -1045,148 +1149,61 @@ function pmLevelComplete(){
   showToast('Seviye '+PM.level+' tamam! +'+xp+' XP');
   addTx('&#127919;','Pic-Man Seviye '+PM.level+' Tamamlandi',xp);
   updateXPWidget(xp);
-  setTimeout(function(){ updateAllStats(); },1000);
+  setTimeout(function(){updateAllStats();},1000);
   if(PM.level>=21){
     pmShowMsg('TEBRIKLER!','Tum 21 seviye tamamlandi!');
     setSts('pm-sts','ok','Harika! Toplam '+PM.xpEarned+' XP!');
     PM.gameOver=true; pmDraw(1); return;
   }
   PM.level++;
-  document.getElementById('pm-level').textContent=PM.level+' / 21';
-  pmShowMsg('SEVIYE '+(PM.level-1)+' TAMAM!','+'+xp+' XP — Devam icin ► bas');
+  pmSaveLevel();
   pmDraw(1);
+  pmShowMsg('SEVIYE '+(PM.level-1)+' TAMAM!','+'+xp+' XP \u2014 Devam icin \u25ba bas');
 }
 
 function pmGameOver(){
   PM.running=false;
-  if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
+  if(PM.animId){cancelAnimationFrame(PM.animId);PM.animId=null;}
   PM.gameOver=true;
-  pmShowMsg('OYUN BITTI','Skor: '+PM.score+' — Tekrar icin ► bas');
-  setSts('pm-sts','err','Oyun bitti. XP: '+PM.xpEarned);
   pmDraw(1);
+  pmShowMsg('OYUN BITTI','Skor: '+PM.score+' \u2014 Tekrar icin \u25ba bas');
+  setSts('pm-sts','err','Oyun bitti. XP: '+PM.xpEarned);
 }
 
 function pmStartOrRestart(){
-  if(PM.animId){ cancelAnimationFrame(PM.animId); PM.animId=null; }
+  if(PM.animId){cancelAnimationFrame(PM.animId);PM.animId=null;}
   var isLevelComplete=PM.started&&!PM.running&&!PM.gameOver;
   if(!isLevelComplete){
-    PM.level=1; PM.score=0; PM.lives=3;
+    // Yeni oyun — kaydedilen seviyeden başla
+    PM.level=pmLoadLevel();
+    PM.score=0; PM.lives=3; PM.scoreForLife=0;
     PM.gameOver=false;
     document.getElementById('pm-score').textContent='0';
-    document.getElementById('pm-level').textContent='1 / 21';
     document.getElementById('pm-xp-earned').textContent=PM.xpEarned;
     document.getElementById('pm-sts').className='sts';
     pmUpdateLives();
   }
   PM.started=true; PM.running=false;
-  pmInit();
-  pmHideMsg();
-  pmDraw(1);
+  pmInit(); pmHideMsg(); pmDraw(1);
   setTimeout(function(){
-    PM.running=true;
-    PM.lastTs=performance.now();
+    PM.running=true; PM.lastTs=performance.now();
     PM.animId=requestAnimationFrame(pmLoop);
   },100);
 }
 
 function pmDir(dx,dy){
-  // Kullanıcı yön verdi — her zaman queue'ya yaz
-  PM.qx = dx; PM.qy = dy;
-  PM.qttl = 4; // 4 tick boyunca dene
-  // Pac-Man duruyorsa (dx=dy=0) ve istenen yön geçerliyse anında başlat
-  if(PM.dx === 0 && PM.dy === 0){
-    if(!pmIsWall(PM.row + dy, PM.col + dx)){
-      PM.dx = dx; PM.dy = dy;
-      PM.qx = 0; PM.qy = 0; PM.qttl = 0;
-    }
+  PM.qx=dx; PM.qy=dy; PM.qttl=4;
+  if(PM.dx===0&&PM.dy===0&&!pmIsWall(PM.row+dy,PM.col+dx)){
+    PM.dx=dx; PM.dy=dy; PM.qx=0; PM.qy=0; PM.qttl=0;
   }
 }
 
 document.addEventListener('keydown',function(e){
   var map={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],
            w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]};
-  if(map[e.key]){ e.preventDefault(); pmDir(map[e.key][0],map[e.key][1]); }
+  if(map[e.key]){e.preventDefault();pmDir(map[e.key][0],map[e.key][1]);}
   if(e.key===' '||e.key==='Enter') pmStartOrRestart();
 });
-
-// ─── KALICI XP DEPOLAMA (localStorage) ──────────────────────────────────────
-// Her XP kaynağı ayrı ayrı saklanır.
-// Anahtar: basefun_xp_{address}_{source}
-// Kaynaklar: pacman, number (on-chain olanlar kontrat üzerinden gelir)
-
-function xpKey(source) {
-  var addr = acct ? acct.toLowerCase() : 'guest';
-  return 'basefun_xp_' + addr + '_' + source;
-}
-
-function saveXP(source, val) {
-  try { localStorage.setItem(xpKey(source), String(val)); } catch(e){}
-}
-
-function loadXP(source) {
-  try { return parseInt(localStorage.getItem(xpKey(source)) || '0') || 0; } catch(e){ return 0; }
-}
-
-function loadAllLocalXP() {
-  PM.xpEarned = loadXP('pacman');
-  NG.localXP  = loadXP('number');
-  document.getElementById('pm-xp-earned').textContent = PM.xpEarned;
-}
-
-// ─── İŞLEM GEÇMİŞİ ──────────────────────────────────────────────────────────
-// Son 10 işlem localStorage'da saklanır.
-// Her işlem: { icon, title, xp, time (ISO string) }
-
-function txKey(){
-  var addr = acct ? acct.toLowerCase() : 'guest';
-  return 'basefun_tx_' + addr;
-}
-
-function loadTxHistory(){
-  try {
-    return JSON.parse(localStorage.getItem(txKey()) || '[]');
-  } catch(e){ return []; }
-}
-
-function saveTxHistory(list){
-  try { localStorage.setItem(txKey(), JSON.stringify(list.slice(0,10))); } catch(e){}
-}
-
-function addTx(icon, title, xp){
-  var list = loadTxHistory();
-  list.unshift({
-    icon: icon,
-    title: title,
-    xp: xp,
-    time: new Date().toISOString()
-  });
-  saveTxHistory(list);
-  renderTxHistory();
-}
-
-function renderTxHistory(){
-  var el = document.getElementById('prof-tx-list');
-  if(!el) return;
-  var list = loadTxHistory();
-  if(list.length === 0){
-    el.innerHTML = '<div style="text-align:center;color:var(--tx2);font-size:13px;padding:20px 0">Henuz islem yok</div>';
-    return;
-  }
-  el.innerHTML = list.map(function(tx){
-    var d = new Date(tx.time);
-    var dateStr = d.toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric'});
-    var timeStr = d.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-    var xpStr = tx.xp > 0 ? ('+' + tx.xp + ' XP') : '';
-    return '<div class="tx-row">'
-      + '<div class="tx-icon">' + tx.icon + '</div>'
-      + '<div class="tx-info">'
-      + '<div class="tx-title">' + tx.title + '</div>'
-      + '<div class="tx-time">' + dateStr + ' ' + timeStr + '</div>'
-      + '</div>'
-      + (xpStr ? '<div class="tx-xp">' + xpStr + '</div>' : '')
-      + '</div>';
-  }).join('');
-}
 
 // ─── FARCASTER SDK ───────────────────────────────────────────────────────────
 async function initFarcasterSDK(){
