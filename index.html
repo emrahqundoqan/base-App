@@ -1421,7 +1421,11 @@ async function updateAllStats(){
     var wc=new ethers.Contract(ADDR.WHEEL,ABIS.WHEEL,prov);
     var dc=new ethers.Contract(ADDR.DICE,ABIS.DICE,prov);
     var cRes=[0n,0n,0n],wS=[0n],dS=[0n];
-    try{cRes=await Promise.all([ck.userStreaks(acct),ck.totalUserCheckIns(acct),ck.lastCheckIn(acct)]);}catch(e){}
+    var ckLoaded=false;
+    try{
+      cRes=await Promise.all([ck.userStreaks(acct),ck.totalUserCheckIns(acct),ck.lastCheckIn(acct)]);
+      ckLoaded=true;
+    }catch(e){ console.warn('CheckIn contract read error:',e); }
     try{wS=await wc.getPlayerStats(acct);}catch(e){}
     try{dS=await dc.getPlayerStats(acct);}catch(e){}
     var checkInXP=Number(cRes[1]||0n)*10;
@@ -1445,13 +1449,19 @@ async function updateAllStats(){
     var lastResetUtc,nextResetUtc;
     if(nowTs>=todayTrMidnightUtc){lastResetUtc=todayTrMidnightUtc;nextResetUtc=todayTrMidnightUtc+86400;}
     else{lastResetUtc=todayTrMidnightUtc-86400;nextResetUtc=todayTrMidnightUtc;}
-    var canCk=(lastTime===0)||(lastTime<lastResetUtc);
-    var diffSec=nextResetUtc-nowTs;
-    var statusTxt;
-    if(canCk) statusTxt='Hazir!';
-    else{var hh=Math.floor(diffSec/3600),mm=Math.floor((diffSec%3600)/60);statusTxt=hh+'s '+mm+'dk sonra (00:00 TR)';}
-    document.getElementById('ck-status').textContent=statusTxt;
-    document.getElementById('ck-btn').disabled=!canCk;
+    // Kontrat okunamazsa butonu disable et, yanlış "Hazır!" gösterme
+    if(!ckLoaded){
+      document.getElementById('ck-status').textContent='Kontrat okunamadi';
+      document.getElementById('ck-btn').disabled=true;
+    } else {
+      var canCk=(lastTime===0)||(lastTime<lastResetUtc);
+      var diffSec=nextResetUtc-nowTs;
+      var statusTxt;
+      if(canCk) statusTxt='Hazir!';
+      else{var hh=Math.floor(diffSec/3600),mm=Math.floor((diffSec%3600)/60);statusTxt=hh+'s '+mm+'dk sonra (00:00 TR)';}
+      document.getElementById('ck-status').textContent=statusTxt;
+      document.getElementById('ck-btn').disabled=!canCk;
+    }
 
     // Profil güncelle
     updateProfile(checkInXP, Number(wS[0]||0n), Number(dS[0]||0n), totalXP, loadXP("gm"), NG.localXP);
@@ -1472,8 +1482,14 @@ async function doCheckIn(){
     addTx('&#128197;', 'Check-in', 10);
     updateAllStats();
   }catch(e){
-    var msg=e.code===4001?'Islem reddedildi.':(e.reason||e.message||'Hata').slice(0,80);
+    var msg='';
+    if(e.code===4001||e.code===-32603) msg='Islem reddedildi.';
+    else if(e.reason) msg=e.reason.slice(0,80);
+    else if(e.data&&e.data.message) msg=e.data.message.slice(0,80);
+    else if(e.message) msg=e.message.slice(0,80);
+    else msg='Bilinmeyen hata';
     setSts('ck-sts','err','Hata: '+msg);
+    console.error('CheckIn error:',e);
   }
 }
 
